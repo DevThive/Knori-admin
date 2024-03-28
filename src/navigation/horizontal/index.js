@@ -13,18 +13,24 @@ const navigation = () => {
           icon: 'tabler:device-analytics',
           title: 'CRM',
           path: '/dashboards/crm'
-        },
-        {
-          icon: 'tabler:shopping-cart',
-          title: 'eCommerce',
-          path: '/dashboards/ecommerce'
         }
+
+        // {
+        //   icon: 'tabler:shopping-cart',
+        //   title: 'eCommerce',
+        //   path: '/dashboards/ecommerce'
+        // }
       ]
     },
     {
       icon: 'tabler:layout-grid-add',
       title: 'Apps',
       children: [
+        {
+          title: 'Notices',
+          icon: 'pepicons-pencil:bulletin-notice',
+          path: '/apps/notice'
+        },
         {
           title: 'Email',
           icon: 'tabler:mail',
@@ -61,56 +67,57 @@ const navigation = () => {
               path: '/apps/invoice/add'
             }
           ]
-        },
-        {
-          title: 'User',
-          icon: 'tabler:user',
-          children: [
-            {
-              title: 'List',
-              path: '/apps/user/list'
-            },
-            {
-              title: 'View',
-              children: [
-                {
-                  title: 'Account',
-                  path: '/apps/user/view/account'
-                },
-                {
-                  title: 'Security',
-                  path: '/apps/user/view/security'
-                },
-                {
-                  title: 'Billing & Plans',
-                  path: '/apps/user/view/billing-plan'
-                },
-                {
-                  title: 'Notifications',
-                  path: '/apps/user/view/notification'
-                },
-                {
-                  title: 'Connection',
-                  path: '/apps/user/view/connection'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          title: 'Roles & Permissions',
-          icon: 'tabler:settings',
-          children: [
-            {
-              title: 'Roles',
-              path: '/apps/roles'
-            },
-            {
-              title: 'Permissions',
-              path: '/apps/permissions'
-            }
-          ]
         }
+
+        // {
+        //   title: 'User',
+        //   icon: 'tabler:user',
+        //   children: [
+        //     {
+        //       title: 'List',
+        //       path: '/apps/user/list'
+        //     },
+        //     {
+        //       title: 'View',
+        //       children: [
+        //         {
+        //           title: 'Account',
+        //           path: '/apps/user/view/account'
+        //         },
+        //         {
+        //           title: 'Security',
+        //           path: '/apps/user/view/security'
+        //         },
+        //         {
+        //           title: 'Billing & Plans',
+        //           path: '/apps/user/view/billing-plan'
+        //         },
+        //         {
+        //           title: 'Notifications',
+        //           path: '/apps/user/view/notification'
+        //         },
+        //         {
+        //           title: 'Connection',
+        //           path: '/apps/user/view/connection'
+        //         }
+        //       ]
+        //     }
+        //   ]
+        // },
+        // {
+        //   title: 'Roles & Permissions',
+        //   icon: 'tabler:settings',
+        //   children: [
+        //     {
+        //       title: 'Roles',
+        //       path: '/apps/roles'
+        //     },
+        //     {
+        //       title: 'Permissions',
+        //       path: '/apps/permissions'
+        //     }
+        //   ]
+        // }
       ]
     },
     {
@@ -128,7 +135,6 @@ const navigation = () => {
           icon: 'tabler:brand-tabler'
         },
         {
-          
           title: 'Cards',
           icon: 'tabler:id',
           children: [
@@ -237,7 +243,7 @@ const navigation = () => {
             {
               title: 'More',
               path: '/components/more'
-            },
+            }
           ]
         }
       ]
@@ -530,7 +536,7 @@ const navigation = () => {
             {
               title: 'Input Mask',
               path: '/forms/form-elements/input-mask'
-            },
+            }
           ]
         },
         {
