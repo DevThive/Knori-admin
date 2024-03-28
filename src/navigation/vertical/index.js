@@ -13,11 +13,12 @@ const navigation = () => {
         {
           title: 'CRM',
           path: '/dashboards/crm'
-        },
-        {
-          title: 'eCommerce',
-          path: '/dashboards/ecommerce'
         }
+
+        // {
+        //   title: 'eCommerce',
+        //   path: '/dashboards/ecommerce'
+        // }
       ]
     },
     {
@@ -59,6 +60,10 @@ const navigation = () => {
           path: '/apps/invoice/add'
         }
       ]
+    },
+    {
+      title: 'Notices',
+      icon: 'pepicons-pencil:bulletin-notice'
     },
     {
       title: 'User',
@@ -346,7 +351,6 @@ const navigation = () => {
       icon: 'tabler:brand-tabler'
     },
     {
-      
       title: 'Cards',
       icon: 'tabler:id',
       children: [
@@ -457,7 +461,7 @@ const navigation = () => {
         {
           title: 'More',
           path: '/components/more'
-        },
+        }
       ]
     },
     {
@@ -518,7 +522,7 @@ const navigation = () => {
         {
           title: 'Input Mask',
           path: '/forms/form-elements/input-mask'
-        },
+        }
       ]
     },
     {
