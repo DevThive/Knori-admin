@@ -54,18 +54,21 @@ const InvoicePrint = ({ id }) => {
   }, [])
   useEffect(() => {
     axios
-      .get('/apps/invoice/single-invoice', { params: { id } })
+      .get(`https://api.knori.or.kr/invoice/${id}`)
       .then(res => {
+        // console.log(res.data[0])
         setData(res.data)
         setError(false)
       })
-      .catch(() => {
+      .catch(error => {
+        console.log(error)
         setData(null)
         setError(true)
       })
   }, [id])
   if (data) {
     const { invoice, paymentDetails } = data
+    console.log(data)
 
     return (
       <Box sx={{ p: 12, pb: 6 }}>
@@ -73,7 +76,7 @@ const InvoicePrint = ({ id }) => {
           <Grid item xs={8} sx={{ mb: { sm: 0, xs: 4 } }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ mb: 6, display: 'flex', alignItems: 'center' }}>
-                <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                {/* <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
                   <path
                     fillRule='evenodd'
                     clipRule='evenodd'
@@ -100,31 +103,33 @@ const InvoicePrint = ({ id }) => {
                     fill={theme.palette.primary.main}
                     d='M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z'
                   />
-                </svg>
+                </svg> */}
                 <Typography variant='h4' sx={{ ml: 2.5, fontWeight: 700, lineHeight: '24px' }}>
                   {themeConfig.templateName}
                 </Typography>
               </Box>
               <div>
-                <Typography sx={{ mb: 1, color: 'text.secondary' }}>Office 149, 450 South Brand Brooklyn</Typography>
-                <Typography sx={{ mb: 1, color: 'text.secondary' }}>San Diego County, CA 91905, USA</Typography>
-                <Typography sx={{ color: 'text.secondary' }}>+1 (123) 456 7891, +44 (876) 543 2198</Typography>
+                <Typography sx={{ mb: 2, color: 'text.secondary' }}>경기도 양주시 백석읍 기산로 548</Typography>
+                <Typography sx={{ mb: 2, color: 'text.secondary' }}>(재)케이놀이문화재단</Typography>
+                <Typography sx={{ color: 'text.secondary' }}>+82 (031) 876 9500</Typography>
               </div>
             </Box>
           </Grid>
           <Grid item xs={4}>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { sm: 'flex-end', xs: 'flex-start' } }}>
               <Typography variant='h4' sx={{ mb: 2 }}>
-                {`Invoice #${invoice.id}`}
+                {`Invoice #${data.id}`}
               </Typography>
               <Box sx={{ mb: 2, display: 'flex' }}>
-                <Typography sx={{ mr: 3, color: 'text.secondary' }}>Date Issued:</Typography>
-                <Typography sx={{ fontWeight: 600, color: 'text.secondary' }}>{invoice.issuedDate}</Typography>
+                <Typography sx={{ mr: 3, color: 'text.secondary' }}>발행일 :</Typography>
+                <Typography sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                  {new Date(data.issuedDate).toLocaleDateString()}
+                </Typography>
               </Box>
-              <Box sx={{ display: 'flex' }}>
-                <Typography sx={{ mr: 3, color: 'text.secondary' }}>Date Due:</Typography>
-                <Typography sx={{ fontWeight: 600, color: 'text.secondary' }}>{invoice.dueDate}</Typography>
-              </Box>
+              {/* <Box sx={{ display: 'flex' }}>
+                <Typography sx={{ mr: 3, color: 'text.secondary' }}>마감일 :</Typography>
+                <Typography sx={{ fontWeight: 600, color: 'text.secondary' }}>{data.dueDate}</Typography>
+              </Box> */}
             </Box>
           </Grid>
         </Grid>
@@ -134,41 +139,41 @@ const InvoicePrint = ({ id }) => {
         <Grid container>
           <Grid item xs={7} md={8} sx={{ mb: { lg: 0, xs: 4 } }}>
             <Typography variant='h6' sx={{ mb: 3.5, fontWeight: 600 }}>
-              Invoice To:
+              받는 사람 :
             </Typography>
-            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{invoice.name}</Typography>
-            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{invoice.company}</Typography>
-            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{invoice.address}</Typography>
-            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{invoice.contact}</Typography>
-            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{invoice.companyEmail}</Typography>
+            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{data.name}</Typography>
+            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{data.company}</Typography>
+            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{data.address}</Typography>
+            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{data.contact}</Typography>
+            <Typography sx={{ mb: 2, color: 'text.secondary' }}>{data.companyEmail}</Typography>
           </Grid>
           <Grid item xs={5} md={4}>
             <Typography variant='h6' sx={{ mb: 3.5, fontWeight: 600 }}>
-              Bill To:
+              청구 대상 :
             </Typography>
             <Table>
               <TableBody>
                 <TableRow>
                   <MUITableCell sx={{ color: 'text.secondary' }}>Total Due:</MUITableCell>
                   <MUITableCell sx={{ fontWeight: 500, color: 'text.secondary' }}>
-                    {paymentDetails.totalDue}
+                    {/* {paymentDetails.totalDue} */}
                   </MUITableCell>
                 </TableRow>
                 <TableRow>
                   <MUITableCell sx={{ color: 'text.secondary' }}>Bank name:</MUITableCell>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>{paymentDetails.bankName}</MUITableCell>
+                  <MUITableCell sx={{ color: 'text.secondary' }}>{/* {paymentDetails.bankName} */}</MUITableCell>
                 </TableRow>
                 <TableRow>
                   <MUITableCell sx={{ color: 'text.secondary' }}>Country:</MUITableCell>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>{paymentDetails.country}</MUITableCell>
+                  <MUITableCell sx={{ color: 'text.secondary' }}>{/* {paymentDetails.country} */}</MUITableCell>
                 </TableRow>
                 <TableRow>
                   <MUITableCell sx={{ color: 'text.secondary' }}>IBAN:</MUITableCell>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>{paymentDetails.iban}</MUITableCell>
+                  <MUITableCell sx={{ color: 'text.secondary' }}>{/* {paymentDetails.iban} */}</MUITableCell>
                 </TableRow>
                 <TableRow>
                   <MUITableCell sx={{ color: 'text.secondary' }}>SWIFT code:</MUITableCell>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>{paymentDetails.swiftCode}</MUITableCell>
+                  <MUITableCell sx={{ color: 'text.secondary' }}>{/* {paymentDetails.swiftCode} */}</MUITableCell>
                 </TableRow>
               </TableBody>
             </Table>

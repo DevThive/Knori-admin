@@ -18,23 +18,30 @@ import AddPaymentDrawer from 'src/views/apps/invoice/shared-drawer/AddPaymentDra
 import SendInvoiceDrawer from 'src/views/apps/invoice/shared-drawer/SendInvoiceDrawer'
 
 const InvoicePreview = ({ id }) => {
+  console.log(id)
+
   // ** State
   const [error, setError] = useState(false)
   const [data, setData] = useState(null)
   const [addPaymentOpen, setAddPaymentOpen] = useState(false)
   const [sendInvoiceOpen, setSendInvoiceOpen] = useState(false)
+
   useEffect(() => {
     axios
-      .get('/apps/invoice/single-invoice', { params: { id } })
+      .get(`https://api.knori.or.kr/invoice/${id}`)
       .then(res => {
+        // console.log(res.data)
         setData(res.data)
         setError(false)
       })
-      .catch(() => {
+      .catch(error => {
+        console.log(error)
         setData(null)
         setError(true)
       })
   }, [id])
+
+  // console.log(data)
   const toggleSendInvoiceDrawer = () => setSendInvoiceOpen(!sendInvoiceOpen)
   const toggleAddPaymentDrawer = () => setAddPaymentOpen(!addPaymentOpen)
   if (data) {
@@ -61,7 +68,7 @@ const InvoicePreview = ({ id }) => {
       <Grid container spacing={6}>
         <Grid item xs={12}>
           <Alert severity='error'>
-            Invoice with the id: {id} does not exist. Please check the list of invoices:{' '}
+            {/* Invoice with the id: {id} does not exist. Please check the list of invoices:{' '} */}
             <Link href='/apps/invoice/list'>Invoice List</Link>
           </Alert>
         </Grid>

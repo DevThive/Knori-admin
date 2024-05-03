@@ -65,6 +65,7 @@ const navigation = () => {
       title: 'Notices',
       icon: 'pepicons-pencil:bulletin-notice'
     },
+
     {
       title: 'User',
       icon: 'tabler:user',
