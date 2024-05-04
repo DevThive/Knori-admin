@@ -10,9 +10,9 @@ import axios from 'axios'
 export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async calendars => {
   const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
-  // console.log(calendars)
-
-  const response = await axios.get('https://api.knori.or.kr/calendar', {
+  // axios.get의 두 번째 인자로 params와 headers를 포함하는 설정 객체를 전달합니다.
+  const response = await axios.get('http://localhost:4001/calendar', {
+    params: { calendars },
     headers: {
       Authorization: `Bearer ${storedToken}`
     }

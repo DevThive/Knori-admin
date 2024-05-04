@@ -216,7 +216,7 @@ const columns = (updateData, handleEditClick) => [
 
         const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
         try {
-          const response = await axios.delete(`https://api.knori.or.kr/admin/reservation/${id}`, {
+          const response = await axios.delete(`https://api.knori.or.kr/reservation/admin/${id}`, {
             headers: {
               Authorization: `Bearer ${storedToken}`
             }
@@ -322,7 +322,7 @@ const TableColumns = () => {
 
     const filteredRows = data.filter(row => {
       return Object.keys(row).some(field => {
-        // console.log(field)
+        console.log(field)
 
         // @ts-ignore
         return searchRegex.test(row[field].toString())
@@ -374,7 +374,8 @@ const TableColumns = () => {
     // }
 
     console.log('Modified reservation info:', selectedReservation)
-    closeModal() // 실제 구현 시, 요청 성공 후 모달을 닫습니다.
+
+    // closeModal() // 실제 구현 시, 요청 성공 후 모달을 닫습니다.
   }
 
   return (
@@ -434,7 +435,7 @@ const TableColumns = () => {
                 type='text'
                 fullWidth // fullWidth를 유지하되 Grid 아이템 크기로 반응형 조정
                 variant='outlined'
-                value={selectedReservation ? selectedReservation.client_email : ''}
+                defaultValue={selectedReservation ? selectedReservation.client_email : ''}
                 onChange={handleChange}
               />
             </Grid>
@@ -448,7 +449,7 @@ const TableColumns = () => {
                 margin='dense'
                 name='phone'
                 label='번호'
-                type='text'
+                type='number'
                 fullWidth // fullWidth를 유지하되 Grid 아이템 크기로 반응형 조정
                 variant='outlined'
                 defaultValue={selectedReservation ? selectedReservation.client_phonenumber : ''}
@@ -460,15 +461,27 @@ const TableColumns = () => {
               {/* xs={6}으로 설정하여 화면을 반으로 나눔 */}
               <TextField
                 margin='dense'
-                name='people'
+                name='totalPeople'
                 label='인원 수'
                 type='text'
                 fullWidth // fullWidth를 유지하되 Grid 아이템 크기로 반응형 조정
                 variant='outlined'
-                value={selectedReservation ? selectedReservation.client_totalpeople : ''}
+                defaultValue={selectedReservation ? selectedReservation.totalPeople : ''}
                 onChange={handleChange}
               />
             </Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              margin='dense'
+              name='note'
+              label='메모'
+              type='textarea'
+              fullWidth // fullWidth를 유지하되 Grid 아이템 크기로 반응형 조정
+              variant='outlined'
+              defaultValue={selectedReservation ? selectedReservation.etc : ''}
+              onChange={handleChange}
+            />
           </Grid>
         </DialogContent>
         <DialogActions>
