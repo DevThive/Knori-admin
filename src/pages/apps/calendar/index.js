@@ -32,9 +32,8 @@ import {
 const calendarsColor = {
   Personal: 'error',
   Business: 'primary',
-  Family: 'warning',
-  Holiday: 'success',
-  ETC: 'info'
+
+  Holiday: 'success'
 }
 
 const AppCalendar = () => {

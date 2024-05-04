@@ -73,16 +73,14 @@ const AddEventSidebar = props => {
 
   const onSubmit = data => {
     const modifiedEvent = {
-      url: values.url,
       display: 'block',
       title: data.title,
       end: values.endDate,
       allDay: values.allDay,
       start: values.startDate,
+      content: values.description,
       extendedProps: {
-        calendar: capitalize(values.calendar),
-        guests: values.guests && values.guests.length ? values.guests : undefined,
-        description: values.description.length ? values.description : undefined
+        calendar: capitalize(values.calendar)
       }
     }
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
@@ -255,9 +253,9 @@ const AddEventSidebar = props => {
             >
               <MenuItem value='Personal'>Personal</MenuItem>
               <MenuItem value='Business'>Business</MenuItem>
-              <MenuItem value='Family'>Family</MenuItem>
+              {/* <MenuItem value='Family'>Family</MenuItem> */}
               <MenuItem value='Holiday'>Holiday</MenuItem>
-              <MenuItem value='ETC'>ETC</MenuItem>
+              {/* <MenuItem value='ETC'>ETC</MenuItem> */}
             </CustomTextField>
             <Box sx={{ mb: 4 }}>
               <DatePicker
