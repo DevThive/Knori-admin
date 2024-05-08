@@ -2,19 +2,36 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** Axios Imports
 import axios from 'axios'
+import authConfig from 'src/configs/auth'
 
 // ** Fetch Invoices
 export const fetchData = createAsyncThunk('appInvoice/fetchData', async params => {
-  const response = await axios.get('/apps/invoice/invoices', {
-    params
-  })
+  const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+  try {
+    const response = await axios.get('https://api.knori.or.kr/invoice/invoicelist', {
+      headers: {
+        Authorization: `Bearer ${storedToken}`
+      },
+      params: params
+    })
+    console.log(response)
 
-  return response.data
+    return response.data
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    throw error // 또는 적절한 오류 처리
+  }
 })
 
+// http://localhost:4001/invoice/invoicelist
+
 export const deleteInvoice = createAsyncThunk('appInvoice/deleteData', async (id, { getState, dispatch }) => {
-  const response = await axios.delete('/apps/invoice/delete', {
-    data: id
+  const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+  const response = await axios.delete(`https://api.knori.or.kr/invoice/${id}`, {
+    headers: {
+      Authorization: `Bearer ${storedToken}`
+    }
   })
   await dispatch(fetchData(getState().invoice.params))
 

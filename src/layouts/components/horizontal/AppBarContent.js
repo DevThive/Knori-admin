@@ -59,29 +59,36 @@ const notifications = [
 
 const shortcuts = [
   {
-    title: 'Calendar',
-    url: '/apps/calendar',
-    icon: 'tabler:calendar',
-    subtitle: 'Appointments'
-  },
-  {
-    title: 'Invoice App',
+    title: '클래스',
     url: '/apps/invoice/list',
     icon: 'tabler:file-invoice',
-    subtitle: 'Manage Accounts'
+    subtitle: '클래스 설정'
   },
   {
-    title: 'User App',
-    icon: 'tabler:users',
-    url: '/apps/user/list',
-    subtitle: 'Manage Users'
+    title: '공지사항',
+    icon: 'pepicons-pencil:bulletin-notice',
+    url: '/apps/notice',
+    subtitle: '공지사항 설정'
   },
   {
-    url: '/apps/roles',
-    icon: 'tabler:lock',
-    subtitle: 'Permissions',
-    title: 'Role Management'
+    url: '/apps/reservation',
+    icon: 'tabler:calendar',
+    subtitle: '예약 확인하기',
+    title: '예약현황'
   },
+  {
+    url: '/apps/reservation-success',
+    icon: 'tabler:calendar',
+    subtitle: '이전예약 확인하기',
+    title: '이전예약'
+  },
+  {
+    title: '캘린더',
+    url: '/apps/calendar',
+    icon: 'tabler:calendar',
+    subtitle: '예약 일정 관리'
+  },
+
   {
     subtitle: 'CRM',
     title: 'Dashboard',

@@ -14,25 +14,20 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
-import fetchDataAndProcess from 'src/@real-db/app/noticesDB'
+import classDataDB from 'src/@real-db/app/classDB'
 import Button from '@mui/material/Button'
 import Modal from '@mui/material/Modal'
 import Box from '@mui/material/Box'
 import { Typography } from '@mui/material'
-import Noticeeditor from 'src/views/apps/notice/noticeAdd'
-import noticeSelector from 'src/views/apps/notice/noticeSelector'
+import Classeditor from 'src/views/apps/class/classAdd'
 
-// ** selector import
-
-import Switch from '@mui/material/Switch'
-import FormGroup from '@mui/material/FormGroup'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Noticeeditor2 from 'src/views/apps/notice/noticeUpdate'
-import TogglePrivacy from 'src/views/apps/notice/noticeSelector'
+import Classeditor2 from 'src/views/apps/class/classUpdate'
+import ClassToggle from 'src/views/apps/class/classesSelector'
+import ScheduleModal from 'src/views/apps/class/schedule'
 
 const columns = [
-  { id: 'owner', label: '작성자', minWidth: 80 },
-  { id: 'name', label: '타이틀', minWidth: 200 },
+  { id: 'id', label: 'ID', minWidth: 80 },
+  { id: 'title', label: '타이틀', minWidth: 200 },
   { id: 'date', label: '작성 날짜', minWidth: 100 },
   { id: 'etc', label: '', align: 'right', minWidth: 40 }
 ]
@@ -44,7 +39,7 @@ const TableStickyHeader = () => {
   // ** States
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
-  const [notices, setNotices] = useState([]) // 상태 추가
+  const [classes, setClasses] = useState([]) // 상태 추가
 
   // const [title, setTitle] = useState('') // 제목을 위한 상태
   // const [content, setContent] = useState('') // 에디터 내용을 위한 상태
@@ -55,14 +50,14 @@ const TableStickyHeader = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchDataAndProcess()
-      setNotices(data)
+      const data = await classDataDB()
+      setClasses(data)
     }
     fetchData()
   }, [])
 
-  const updateNotices = newNotice => {
-    setNotices([...notices, newNotice])
+  const updateClass = newClass => {
+    setClasses([...classes, newClass])
   }
 
   const handleChangePage = (event, newPage) => {
@@ -123,7 +118,7 @@ const TableStickyHeader = () => {
         }}
       >
         <Typography id='delete-confirmation-modal' variant='h6' component='h2'>
-          삭제하시겠습니까?
+          삭제하시겠습니까? (삭제시 본 클래스 예약 현황이 삭제됩니다.)
         </Typography>
         <Box
           sx={{
@@ -165,7 +160,7 @@ const TableStickyHeader = () => {
     const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
     try {
       // axios를 이용한 삭제 API 호출
-      const response = await axios.delete(`https://api.knori.or.kr/notices/${id}`, {
+      const response = await axios.delete(`https://api.knori.or.kr/class/${id}`, {
         headers: {
           Authorization: `Bearer ${storedToken}`
         }
@@ -173,11 +168,24 @@ const TableStickyHeader = () => {
 
       // axios는 기본적으로 response.ok 대신 try-catch로 에러를 핸들링합니다.
       // 성공적으로 삭제된 후, UI를 업데이트하기 위해 notices 상태를 갱신합니다.
-      setNotices(notices.filter(notice => notice.id !== id))
+      setClasses(classes.filter(notice => notice.id !== id))
     } catch (error) {
       // axios에서는 error.response 등을 통해 더 상세한 정보를 얻을 수 있습니다.
       console.error('Failed to delete the notice:', error.response ? error.response.data : error)
     }
+  }
+
+  const [ScheduleModalOpen, setScheduleModalOpen] = useState(false)
+  const [Schedule, setSchedule] = useState([])
+
+  const handleOpenScModal = data => {
+    setSchedule(data)
+    setScheduleModalOpen(true)
+  }
+
+  const handleCancelScModal = () => {
+    setSchedule([])
+    setScheduleModalOpen(false)
   }
 
   return (
@@ -194,7 +202,6 @@ const TableStickyHeader = () => {
                       <Button variant='contained' color='primary' onClick={handleModalOpen}>
                         추가
                       </Button>
-
                       <Modal
                         open={isModalOpen}
                         onClose={handleCloseModal}
@@ -213,7 +220,7 @@ const TableStickyHeader = () => {
                             p: 4
                           }}
                         >
-                          <Noticeeditor updateNotices={updateNotices} closeModal={handleCloseModal} />
+                          <Classeditor updateNotices={updateClass} closeModal={handleCloseModal} />
                         </Box>
                       </Modal>
                     </div>
@@ -225,14 +232,17 @@ const TableStickyHeader = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {notices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
+            {classes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
               return (
                 <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
                   {columns.map(column => {
                     if (column.id === 'etc') {
                       return (
                         <TableCell key={column.id} align={column.align}>
-                          <TogglePrivacy id={row.id} />{' '}
+                          <ClassToggle id={row.id} />
+                          <Button variant='contained' color='primary' onClick={() => handleOpenScModal(row.id)}>
+                            시간관리
+                          </Button>{' '}
                           <Button variant='contained' color='primary' onClick={() => handleOpenEditModal(row)}>
                             수정하기
                           </Button>{' '}
@@ -258,13 +268,13 @@ const TableStickyHeader = () => {
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component='div'
-        count={notices.length}
+        count={classes.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-
+      {/* 수정 모달 */}
       <Modal
         open={EditModalOpen}
         onClose={handleCancelEditModal}
@@ -283,11 +293,33 @@ const TableStickyHeader = () => {
             p: 4
           }}
         >
-          <Noticeeditor2 updateNotices={updateNotices} closeModal={handleCancelEditModal} editData={Edits} />
+          <Classeditor2 updateNotices={updateClass} closeModal={handleCancelEditModal} editData={Edits} />
         </Box>
       </Modal>
-
+      {/* 삭제 모달 */}
       <DeleteConfirmModal />
+      {/* 시간관리 모달 */}
+      <Modal
+        open={ScheduleModalOpen}
+        onClose={handleCancelScModal}
+        aria-labelledby='모달 창'
+        aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 1000,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4
+          }}
+        >
+          <ScheduleModal closeModal={handleCancelScModal} scheduleData={Schedule} />
+        </Box>
+      </Modal>
     </>
   )
 }

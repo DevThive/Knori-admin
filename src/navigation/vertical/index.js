@@ -22,42 +22,71 @@ const navigation = () => {
       ]
     },
     {
-      sectionTitle: 'Apps & Pages'
-    },
-    {
-      title: 'Email',
-      icon: 'tabler:mail',
-      path: '/apps/email'
-    },
-    {
-      title: 'Chat',
-      icon: 'tabler:messages',
-      path: '/apps/chat'
-    },
-    {
-      title: 'Calendar',
-      icon: 'tabler:calendar',
-      path: '/apps/calendar'
-    },
-    {
-      title: 'Invoice',
-      icon: 'tabler:file-dollar',
+      icon: 'tabler:layout-grid-add',
+      title: 'Apps',
       children: [
         {
-          title: 'List',
+          title: 'Notices',
+          icon: 'pepicons-pencil:bulletin-notice',
+          path: '/apps/notice'
+        },
+        {
+          title: 'classes',
+          icon: 'pepicons-pencil:bulletin-notice',
+          path: '/apps/class'
+        },
+        {
+          title: 'Email',
+          icon: 'tabler:mail',
+          path: '/apps/email'
+        },
+        {
+          title: 'Chat',
+          icon: 'tabler:messages',
+          path: '/apps/chat'
+        }
+
+        // {
+        //   title: 'Calendar',
+        //   icon: 'tabler:calendar',
+        //   path: '/apps/calendar'
+        // },
+      ]
+    },
+    {
+      icon: 'tabler:layout-grid-add',
+      title: '예약',
+      children: [
+        {
+          title: '예약현황',
+          icon: 'tabler:calendar',
+          path: '/apps/reservation'
+        },
+        {
+          title: '이전예약',
+          icon: 'tabler:calendar',
+          path: '/apps/reservation-success'
+        },
+        {
+          title: 'Calendar',
+          icon: 'tabler:calendar',
+          path: '/apps/calendar'
+        },
+        {
+          title: 'Invoice',
+          icon: 'tabler:file-dollar',
           path: '/apps/invoice/list'
-        },
+        }
+      ]
+    },
+    {
+      title: '문의 & FAQ',
+      icon: 'tabler:checkbox',
+      children: [
         {
-          title: 'Preview',
-          path: '/apps/invoice/preview'
-        },
-        {
-          title: 'Edit',
-          path: '/apps/invoice/edit'
-        },
-        {
-          title: 'Add',
-          path: '/apps/invoice/add'
+          title: '문의',
+          path: '/pages/faq',
+          icon: 'tabler:help'
         }
       ]
     },
@@ -65,6 +94,7 @@ const navigation = () => {
       title: 'Notices',
       icon: 'pepicons-pencil:bulletin-notice'
     },
+
     {
       title: 'User',
       icon: 'tabler:user',

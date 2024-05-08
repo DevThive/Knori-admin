@@ -14,19 +14,20 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const blankEvent = {
   title: '',
+
   start: '',
   end: '',
-  allDay: false,
-  url: '',
+  allDay: true,
+  description: '',
+
   extendedProps: {
-    calendar: '',
-    guests: [],
-    location: '',
-    description: ''
+    calendar: ''
   }
 }
 
 const Calendar = props => {
+  // console.log(props)
+
   // ** Props
   const {
     store,
@@ -56,7 +57,7 @@ const Calendar = props => {
       plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin, bootstrap5Plugin],
       initialView: 'dayGridMonth',
       headerToolbar: {
-        start: 'sidebarToggle, prev, next, title',
+        start: 'sidebarToggle, prev, next, name',
         end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
       },
       views: {
@@ -137,6 +138,7 @@ const Calendar = props => {
               ? We can use `eventDragStop` but it doesn't return updated event so we have to use `eventDrop` which returns updated event
             */
       eventDrop({ event: droppedEvent }) {
+        console.log(droppedEvent)
         dispatch(updateEvent(droppedEvent))
       },
 

@@ -28,9 +28,8 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 const capitalize = string => string && string[0].toUpperCase() + string.slice(1)
 
 const defaultState = {
-  url: '',
   title: '',
-  guests: [],
+
   allDay: true,
   description: '',
   endDate: new Date(),
@@ -72,23 +71,43 @@ const AddEventSidebar = props => {
   }
 
   const onSubmit = data => {
+    let start = new Date(values.startDate)
+    let end = new Date(values.endDate)
+
+    if (values.allDay) {
+      // allDay가 true일 경우, start와 end 시간을 각각 00:00:00과 23:59:59으로 설정
+      start.setHours(0, 0, 0, 0) // start 시간을 00:00:00으로 설정
+      end.setHours(23, 59, 59, 999) // end 시간을 23:59:59으로 설정
+
+      // ISO 8601 날짜 포맷으로 변환
+      start = start.toISOString()
+      end = end.toISOString()
+    } else {
+      // allDay가 false일 경우, 날짜와 시간을 ISO 8601 포맷으로 사용
+      start = start.toISOString()
+      end = end.toISOString()
+    }
+
     const modifiedEvent = {
-      url: values.url,
       display: 'block',
       title: data.title,
-      end: values.endDate,
+
       allDay: values.allDay,
-      start: values.startDate,
+      end: end, // 수정된 end 날짜(또는 날짜와 시간) 사용
+      start: start, // 수정된 start 날짜(또는 날짜와 시간) 사용
+
       extendedProps: {
         calendar: capitalize(values.calendar),
-        guests: values.guests && values.guests.length ? values.guests : undefined,
-        description: values.description.length ? values.description : undefined
+        description: values.description
       }
     }
+
+    // 이벤트 추가 또는 업데이트 처리
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       dispatch(addEvent(modifiedEvent))
     } else {
       dispatch(updateEvent({ id: store.selectedEvent.id, ...modifiedEvent }))
+      console.log('test')
     }
     calendarApi.refetchEvents()
     handleSidebarClose()
@@ -114,10 +133,9 @@ const AddEventSidebar = props => {
       const event = store.selectedEvent
       setValue('title', event.title || '')
       setValues({
-        url: event.url || '',
         title: event.title || '',
         allDay: event.allDay,
-        guests: event.extendedProps.guests || [],
+
         description: event.extendedProps.description || '',
         calendar: event.extendedProps.calendar || 'Business',
         endDate: event.end !== null ? event.end : event.start,
@@ -156,10 +174,10 @@ const AddEventSidebar = props => {
       return (
         <Fragment>
           <Button type='submit' variant='contained' sx={{ mr: 4 }}>
-            Add
+            등록
           </Button>
           <Button variant='tonal' color='secondary' onClick={resetToEmptyValues}>
-            Reset
+            초기화
           </Button>
         </Fragment>
       )
@@ -167,10 +185,10 @@ const AddEventSidebar = props => {
       return (
         <Fragment>
           <Button type='submit' variant='contained' sx={{ mr: 4 }}>
-            Update
+            수정
           </Button>
           <Button variant='tonal' color='secondary' onClick={resetToStoredValues}>
-            Reset
+            초기화
           </Button>
         </Fragment>
       )
@@ -194,7 +212,7 @@ const AddEventSidebar = props => {
         }}
       >
         <Typography variant='h5'>
-          {store.selectedEvent !== null && store.selectedEvent.title.length ? 'Update Event' : 'Add Event'}
+          {store.selectedEvent !== null && store.selectedEvent.title.length ? '일정 수정' : '일정 추가'}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {store.selectedEvent !== null && store.selectedEvent.title.length ? (
@@ -233,7 +251,7 @@ const AddEventSidebar = props => {
               render={({ field: { value, onChange } }) => (
                 <CustomTextField
                   fullWidth
-                  label='Title'
+                  label='고객명'
                   value={value}
                   sx={{ mb: 4 }}
                   onChange={onChange}
@@ -247,7 +265,7 @@ const AddEventSidebar = props => {
               select
               fullWidth
               sx={{ mb: 4 }}
-              label='Calendar'
+              label='필터'
               SelectProps={{
                 value: values.calendar,
                 onChange: e => setValues({ ...values, calendar: e.target.value })
@@ -255,9 +273,9 @@ const AddEventSidebar = props => {
             >
               <MenuItem value='Personal'>Personal</MenuItem>
               <MenuItem value='Business'>Business</MenuItem>
-              <MenuItem value='Family'>Family</MenuItem>
+              {/* <MenuItem value='Family'>Family</MenuItem> */}
               <MenuItem value='Holiday'>Holiday</MenuItem>
-              <MenuItem value='ETC'>ETC</MenuItem>
+              {/* <MenuItem value='ETC'>ETC</MenuItem> */}
             </CustomTextField>
             <Box sx={{ mb: 4 }}>
               <DatePicker
@@ -268,7 +286,7 @@ const AddEventSidebar = props => {
                 startDate={values.startDate}
                 showTimeSelect={!values.allDay}
                 dateFormat={!values.allDay ? 'yyyy-MM-dd hh:mm' : 'yyyy-MM-dd'}
-                customInput={<PickersComponent label='Start Date' registername='startDate' />}
+                customInput={<PickersComponent label='시작 날짜' registername='startDate' />}
                 onChange={date => setValues({ ...values, startDate: new Date(date) })}
                 onSelect={handleStartDate}
               />
@@ -283,30 +301,21 @@ const AddEventSidebar = props => {
                 startDate={values.startDate}
                 showTimeSelect={!values.allDay}
                 dateFormat={!values.allDay ? 'yyyy-MM-dd hh:mm' : 'yyyy-MM-dd'}
-                customInput={<PickersComponent label='End Date' registername='endDate' />}
+                customInput={<PickersComponent label='종료 날짜' registername='endDate' />}
                 onChange={date => setValues({ ...values, endDate: new Date(date) })}
               />
             </Box>
+
             <FormControl sx={{ mb: 4 }}>
               <FormControlLabel
-                label='All Day'
+                label='풀타임'
                 control={
                   <Switch checked={values.allDay} onChange={e => setValues({ ...values, allDay: e.target.checked })} />
                 }
               />
             </FormControl>
-            <CustomTextField
-              fullWidth
-              type='url'
-              id='event-url'
-              sx={{ mb: 4 }}
-              label='Event URL'
-              value={values.url}
-              placeholder='https://www.google.com'
-              onChange={e => setValues({ ...values, url: e.target.value })}
-            />
 
-            <CustomTextField
+            {/* <CustomTextField
               select
               fullWidth
               label='Guests'
@@ -322,13 +331,13 @@ const AddEventSidebar = props => {
               <MenuItem value='diana'>Diana</MenuItem>
               <MenuItem value='john'>John</MenuItem>
               <MenuItem value='barry'>Barry</MenuItem>
-            </CustomTextField>
+            </CustomTextField> */}
             <CustomTextField
               rows={4}
               multiline
               fullWidth
               sx={{ mb: 6.5 }}
-              label='Description'
+              label='메모'
               id='event-description'
               value={values.description}
               onChange={e => setValues({ ...values, description: e.target.value })}
