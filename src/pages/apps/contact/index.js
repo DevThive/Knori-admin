@@ -36,12 +36,19 @@ const ContactList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [contact, setContact] = useState([])
   const [openRowId, setOpenRowId] = useState(null)
-  const [answer, setAnswer] = useState('')
+  const [answers, setAnswers] = useState({})
 
   useEffect(() => {
     const fetchData = async () => {
       const data = await contactDB()
       setContact(data)
+
+      // 데이터를 불러온 후, 각 문의사항에 대한 초기 답변 상태를 설정합니다.
+      const initialAnswers = {}
+      data.forEach(item => {
+        initialAnswers[item.id] = item.contact_answer || ''
+      })
+      setAnswers(initialAnswers)
     }
     fetchData()
   }, [])
@@ -55,10 +62,10 @@ const ContactList = () => {
     }
   }
 
-  console.log(contact)
+  // console.log(contact)
 
-  const handleAnswerChange = e => {
-    setAnswer(e.target.value)
+  const handleAnswerChange = (id, value) => {
+    setAnswers(prev => ({ ...prev, [id]: value }))
   }
 
   const handleChangePage = (event, newPage) => {
@@ -70,7 +77,20 @@ const ContactList = () => {
     setPage(0)
   }
 
-  const handleAnswerSubmit = () => {}
+  const handleAnswerSubmit = async id => {
+    const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+    try {
+
+
+      const
+    } catch {}
+
+    // 답변 제출 로직 구현, 예시:
+    const answer = answers[id]
+    console.log(`Submitting answer for contact ID ${id}: ${answer}`)
+
+    // 서버로 답변 제출하기
+  }
 
   return (
     <>
@@ -136,14 +156,13 @@ const ContactList = () => {
                             border: '1px solid #ccc'
                           }}
                           placeholder='여기에 답변을 입력하세요...'
-                          defaultValue={row.contact_answer}
-                          value={answer}
-                          onChange={handleAnswerChange}
+                          value={answers[row.id]} // 각 행의 ID를 키로 사용하여 해당 답변을 value로 설정
+                          onChange={e => handleAnswerChange(row.id, e.target.value)}
                         />
 
                         {/* 저장하기 버튼을 오른쪽으로 이동시키고 디자인을 개선합니다. */}
                         <Box display='flex' justifyContent='flex-end' marginTop={2}>
-                          <Button variant='contained' color='primary' onClick={handleAnswerSubmit(row.id)}>
+                          <Button variant='contained' color='primary' onClick={() => handleAnswerSubmit(row.id)}>
                             저장하기
                           </Button>
                         </Box>
