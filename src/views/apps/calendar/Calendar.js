@@ -14,21 +14,19 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const blankEvent = {
   title: '',
-  name: '',
+
   start: '',
   end: '',
-  allDay: false,
-  url: '',
+  allDay: true,
+  description: '',
+
   extendedProps: {
-    calendar: '',
-    guests: [],
-    location: '',
-    description: ''
+    calendar: ''
   }
 }
 
 const Calendar = props => {
-  console.log(props)
+  // console.log(props)
 
   // ** Props
   const {
@@ -124,7 +122,6 @@ const Calendar = props => {
         }
       },
       dateClick(info) {
-        // console.log(info)
         const ev = { ...blankEvent }
         ev.start = info.date
         ev.end = info.date
@@ -141,6 +138,7 @@ const Calendar = props => {
               ? We can use `eventDragStop` but it doesn't return updated event so we have to use `eventDrop` which returns updated event
             */
       eventDrop({ event: droppedEvent }) {
+        console.log(droppedEvent)
         dispatch(updateEvent(droppedEvent))
       },
 

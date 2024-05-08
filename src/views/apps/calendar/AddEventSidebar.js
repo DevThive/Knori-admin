@@ -28,9 +28,8 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 const capitalize = string => string && string[0].toUpperCase() + string.slice(1)
 
 const defaultState = {
-  url: '',
   title: '',
-  guests: [],
+
   allDay: true,
   description: '',
   endDate: new Date(),
@@ -72,21 +71,43 @@ const AddEventSidebar = props => {
   }
 
   const onSubmit = data => {
+    let start = new Date(values.startDate)
+    let end = new Date(values.endDate)
+
+    if (values.allDay) {
+      // allDay가 true일 경우, start와 end 시간을 각각 00:00:00과 23:59:59으로 설정
+      start.setHours(0, 0, 0, 0) // start 시간을 00:00:00으로 설정
+      end.setHours(23, 59, 59, 999) // end 시간을 23:59:59으로 설정
+
+      // ISO 8601 날짜 포맷으로 변환
+      start = start.toISOString()
+      end = end.toISOString()
+    } else {
+      // allDay가 false일 경우, 날짜와 시간을 ISO 8601 포맷으로 사용
+      start = start.toISOString()
+      end = end.toISOString()
+    }
+
     const modifiedEvent = {
       display: 'block',
       title: data.title,
-      end: values.endDate,
+
       allDay: values.allDay,
-      start: values.startDate,
-      content: values.description,
+      end: end, // 수정된 end 날짜(또는 날짜와 시간) 사용
+      start: start, // 수정된 start 날짜(또는 날짜와 시간) 사용
+
       extendedProps: {
-        calendar: capitalize(values.calendar)
+        calendar: capitalize(values.calendar),
+        description: values.description
       }
     }
+
+    // 이벤트 추가 또는 업데이트 처리
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       dispatch(addEvent(modifiedEvent))
     } else {
       dispatch(updateEvent({ id: store.selectedEvent.id, ...modifiedEvent }))
+      console.log('test')
     }
     calendarApi.refetchEvents()
     handleSidebarClose()
@@ -112,10 +133,9 @@ const AddEventSidebar = props => {
       const event = store.selectedEvent
       setValue('title', event.title || '')
       setValues({
-        url: event.url || '',
         title: event.title || '',
         allDay: event.allDay,
-        guests: event.extendedProps.guests || [],
+
         description: event.extendedProps.description || '',
         calendar: event.extendedProps.calendar || 'Business',
         endDate: event.end !== null ? event.end : event.start,
@@ -154,10 +174,10 @@ const AddEventSidebar = props => {
       return (
         <Fragment>
           <Button type='submit' variant='contained' sx={{ mr: 4 }}>
-            Add
+            등록
           </Button>
           <Button variant='tonal' color='secondary' onClick={resetToEmptyValues}>
-            Reset
+            초기화
           </Button>
         </Fragment>
       )
@@ -165,10 +185,10 @@ const AddEventSidebar = props => {
       return (
         <Fragment>
           <Button type='submit' variant='contained' sx={{ mr: 4 }}>
-            Update
+            수정
           </Button>
           <Button variant='tonal' color='secondary' onClick={resetToStoredValues}>
-            Reset
+            초기화
           </Button>
         </Fragment>
       )
@@ -285,6 +305,7 @@ const AddEventSidebar = props => {
                 onChange={date => setValues({ ...values, endDate: new Date(date) })}
               />
             </Box>
+
             <FormControl sx={{ mb: 4 }}>
               <FormControlLabel
                 label='풀타임'

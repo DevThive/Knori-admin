@@ -63,22 +63,22 @@ const notifications = [
 
 const shortcuts = [
   {
-    title: 'Calendar',
-    url: '/apps/calendar',
-    icon: 'tabler:calendar',
-    subtitle: 'Appointments'
-  },
-  {
-    title: 'Invoice App',
+    title: '클래스',
     url: '/apps/invoice/list',
     icon: 'tabler:file-invoice',
     subtitle: 'Manage Accounts'
   },
   {
-    title: 'User App',
-    icon: 'tabler:users',
-    url: '/apps/user/list',
+    title: '공지사항',
+    icon: 'pepicons-pencil:bulletin-notice',
+    url: '/apps/notice',
     subtitle: 'Manage Users'
+  },
+  {
+    title: '캘린더',
+    url: '/apps/calendar',
+    icon: 'tabler:calendar',
+    subtitle: 'Appointments'
   },
   {
     url: '/apps/roles',

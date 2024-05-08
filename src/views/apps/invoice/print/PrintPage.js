@@ -16,6 +16,8 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import { styled, useTheme } from '@mui/material/styles'
 import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import CardContent from '@mui/material/CardContent'
 
 // ** Third Party Components
 import axios from 'axios'
@@ -69,6 +71,7 @@ const InvoicePrint = ({ id }) => {
   if (data) {
     const { invoice, paymentDetails } = data
     console.log(data)
+    const totalAmount = data.invoiceItems.reduce((acc, item) => acc + item.people * item.price, 0)
 
     return (
       <Box sx={{ p: 12, pb: 6 }}>
@@ -118,7 +121,7 @@ const InvoicePrint = ({ id }) => {
           <Grid item xs={4}>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { sm: 'flex-end', xs: 'flex-start' } }}>
               <Typography variant='h4' sx={{ mb: 2 }}>
-                {`Invoice #${data.id}`}
+                {`청구서 #${data.id}`}
               </Typography>
               <Box sx={{ mb: 2, display: 'flex' }}>
                 <Typography sx={{ mr: 3, color: 'text.secondary' }}>발행일 :</Typography>
@@ -154,26 +157,20 @@ const InvoicePrint = ({ id }) => {
             <Table>
               <TableBody>
                 <TableRow>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>Total Due:</MUITableCell>
-                  <MUITableCell sx={{ fontWeight: 500, color: 'text.secondary' }}>
-                    {/* {paymentDetails.totalDue} */}
+                  <MUITableCell>
+                    <Typography sx={{ color: 'text.secondary' }}>총 지불액 :</Typography>
+                  </MUITableCell>
+                  <MUITableCell>
+                    <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{totalAmount}원</Typography>
                   </MUITableCell>
                 </TableRow>
                 <TableRow>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>Bank name:</MUITableCell>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>{/* {paymentDetails.bankName} */}</MUITableCell>
-                </TableRow>
-                <TableRow>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>Country:</MUITableCell>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>{/* {paymentDetails.country} */}</MUITableCell>
-                </TableRow>
-                <TableRow>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>IBAN:</MUITableCell>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>{/* {paymentDetails.iban} */}</MUITableCell>
-                </TableRow>
-                <TableRow>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>SWIFT code:</MUITableCell>
-                  <MUITableCell sx={{ color: 'text.secondary' }}>{/* {paymentDetails.swiftCode} */}</MUITableCell>
+                  <MUITableCell>
+                    <Typography sx={{ color: 'text.secondary' }}>결제 방식 :</Typography>
+                  </MUITableCell>
+                  <MUITableCell>
+                    <Typography sx={{ color: 'text.secondary' }}>{/* {data.paymentDetails.bankName} */}</Typography>
+                  </MUITableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -182,89 +179,75 @@ const InvoicePrint = ({ id }) => {
 
         <Divider sx={{ mt: theme => `${theme.spacing(6)} !important`, mb: '0 !important' }} />
 
-        <Table sx={{ mb: 6 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Item</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>hours</TableCell>
-              <TableCell>qty</TableCell>
-              <TableCell>Total</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody
-            sx={{
-              '& .MuiTableCell-root': {
-                py: `${theme.spacing(2.5)} !important`,
-                fontSize: theme.typography.body1.fontSize
-              }
-            }}
-          >
-            <TableRow>
-              <TableCell>Premium Branding Package</TableCell>
-              <TableCell>Branding & Promotion</TableCell>
-              <TableCell>48</TableCell>
-              <TableCell>1</TableCell>
-              <TableCell>$32</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Social Media</TableCell>
-              <TableCell>Social media templates</TableCell>
-              <TableCell>42</TableCell>
-              <TableCell>1</TableCell>
-              <TableCell>$28</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Web Design</TableCell>
-              <TableCell>Web designing package</TableCell>
-              <TableCell>46</TableCell>
-              <TableCell>1</TableCell>
-              <TableCell>$24</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>SEO</TableCell>
-              <TableCell>Search engine optimization</TableCell>
-              <TableCell>40</TableCell>
-              <TableCell>1</TableCell>
-              <TableCell>$22</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>클래스명</TableCell>
+                <TableCell>설명</TableCell>
+                <TableCell>가격</TableCell>
+                <TableCell>인원수</TableCell>
+                <TableCell>총액</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody
+              sx={{
+                '& .MuiTableCell-root': {
+                  py: `${theme.spacing(2.5)} !important`,
+                  fontSize: theme.typography.body1.fontSize
+                }
+              }}
+            >
+              {data.invoiceItems.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell>{item.className}</TableCell>
+                  <TableCell>{item.content}</TableCell>
+                  <TableCell>{item.price}</TableCell>
+                  <TableCell>{item.people}</TableCell>
+                  <TableCell>{item.people * item.price}원</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-        <Grid container>
-          <Grid item xs={8} sm={7} lg={9}>
-            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-              <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Salesperson:</Typography>
-              <Typography sx={{ color: 'text.secondary' }}>Tommy Shelby</Typography>
-            </Box>
+        <CardContent sx={{ p: [`${theme.spacing(6)} !important`, `${theme.spacing(10)} !important`] }}>
+          <Grid container>
+            <Grid item xs={12} sm={7} lg={9} sx={{ order: { sm: 1, xs: 2 } }}>
+              <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>구매자 :</Typography>
+                <Typography sx={{ color: 'text.secondary' }}>{data.name}</Typography>
+              </Box>
 
-            <Typography sx={{ color: 'text.secondary' }}>Thanks for your business</Typography>
+              <Typography sx={{ color: 'text.secondary' }}>구매해주셔서 감사합니다.</Typography>
+            </Grid>
+            <Grid item xs={12} sm={5} lg={3} sx={{ mb: { sm: 0, xs: 4 }, order: { sm: 2, xs: 1 } }}>
+              <CalcWrapper>
+                <Typography sx={{ color: 'text.secondary' }}>소계 :</Typography>
+                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{totalAmount}원</Typography>
+              </CalcWrapper>
+
+              {/* <Divider sx={{ my: `${theme.spacing(2)} !important` }} /> */}
+              <CalcWrapper>
+                <Typography sx={{ color: 'text.secondary' }}>할인 :</Typography>
+                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>0%</Typography>
+              </CalcWrapper>
+
+              <Divider sx={{ my: `${theme.spacing(2)} !important` }} />
+              <CalcWrapper>
+                <Typography sx={{ color: 'text.secondary' }}>총액 :</Typography>
+                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{totalAmount}원</Typography>
+              </CalcWrapper>
+            </Grid>
           </Grid>
-          <Grid item xs={4} sm={5} lg={3}>
-            <CalcWrapper>
-              <Typography sx={{ color: 'text.secondary' }}>Subtotal:</Typography>
-              <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>$1800</Typography>
-            </CalcWrapper>
-            <CalcWrapper>
-              <Typography sx={{ color: 'text.secondary' }}>Discount:</Typography>
-              <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>$28</Typography>
-            </CalcWrapper>
-            <CalcWrapper>
-              <Typography sx={{ color: 'text.secondary' }}>Tax:</Typography>
-              <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>21%</Typography>
-            </CalcWrapper>
-            <Divider />
-            <CalcWrapper>
-              <Typography sx={{ color: 'text.secondary' }}>Total:</Typography>
-              <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>$1690</Typography>
-            </CalcWrapper>
-          </Grid>
-        </Grid>
+        </CardContent>
 
         <Divider sx={{ my: `${theme.spacing(6)} !important` }} />
         <Typography sx={{ color: 'text.secondary' }}>
-          <strong>Note:</strong> It was a pleasure working with you and your team. We hope you will keep us in mind for
-          future freelance projects. Thank You!
+          <Typography component='span' sx={{ mr: 1.5, fontWeight: 500, color: 'inherit' }}>
+            메모 :
+          </Typography>
+          {data.note}
         </Typography>
       </Box>
     )

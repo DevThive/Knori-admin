@@ -11,7 +11,7 @@ export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async cal
   const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
   // axios.get의 두 번째 인자로 params와 headers를 포함하는 설정 객체를 전달합니다.
-  const response = await axios.get('http://api.knori.or.kr/calendar', {
+  const response = await axios.get('https://api.knori.or.kr/calendar', {
     params: { calendars },
     headers: {
       Authorization: `Bearer ${storedToken}`
@@ -23,14 +23,14 @@ export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async cal
 
 // ** Add Event
 export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event, { dispatch }) => {
-  // const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+  const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
-  // const response = await axios.post('http://localhost:4000/calendar', event, {
-  //   headers: {
-  //     Authorization: `Bearer ${storedToken}`
-  //   }
-  // }) // 데이터 구조 변경
-  // await dispatch(fetchEvents(['Personal', 'Business', 'Family', 'Holiday', 'ETC']))
+  const response = await axios.post('https://api.knori.or.kr/calendar', event, {
+    headers: {
+      Authorization: `Bearer ${storedToken}`
+    }
+  }) // 데이터 구조 변경
+  await dispatch(fetchEvents(['Personal', 'Business', 'Holiday']))
 
   console.log(event)
 
@@ -39,9 +39,13 @@ export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event, {
 
 // ** Update Event
 export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (event, { dispatch }) => {
-  const response = await axios.post('/apps/calendar/update-event', {
-    data: {
-      event
+  const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+  console.log(event.id, event.description)
+
+  const response = await axios.put(`https://api.knori.or.kr/calendar/${event.id}`, event, {
+    headers: {
+      Authorization: `Bearer ${storedToken}`
     }
   })
   await dispatch(fetchEvents(['Personal', 'Business', 'Holiday']))

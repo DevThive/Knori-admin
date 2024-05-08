@@ -64,6 +64,11 @@ const navigation = () => {
           path: '/apps/reservation'
         },
         {
+          title: '이전예약',
+          icon: 'tabler:calendar',
+          path: '/apps/reservation-success'
+        },
+        {
           title: 'Calendar',
           icon: 'tabler:calendar',
           path: '/apps/calendar'
@@ -72,6 +77,17 @@ const navigation = () => {
           title: 'Invoice',
           icon: 'tabler:file-dollar',
           path: '/apps/invoice/list'
+        }
+      ]
+    },
+    {
+      title: '문의 & FAQ',
+      icon: 'tabler:checkbox',
+      children: [
+        {
+          title: '문의',
+          path: '/apps/contact',
+          icon: 'tabler:help'
         }
       ]
     },
