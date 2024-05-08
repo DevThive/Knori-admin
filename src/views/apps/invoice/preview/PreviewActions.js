@@ -15,10 +15,10 @@ const PreviewActions = ({ id, toggleSendInvoiceDrawer, toggleAddPaymentDrawer })
       <CardContent>
         <Button fullWidth variant='contained' onClick={toggleSendInvoiceDrawer} sx={{ mb: 2, '& svg': { mr: 2 } }}>
           <Icon fontSize='1.125rem' icon='tabler:send' />
-          Send Invoice
+          메일 전송
         </Button>
         <Button fullWidth sx={{ mb: 2 }} color='secondary' variant='tonal'>
-          Download
+          다운로드
         </Button>
         <Button
           fullWidth
@@ -29,7 +29,7 @@ const PreviewActions = ({ id, toggleSendInvoiceDrawer, toggleAddPaymentDrawer })
           color='secondary'
           href={`/apps/invoice/print/${id}`}
         >
-          Print
+          인쇄하기
         </Button>
         <Button
           fullWidth
@@ -39,12 +39,12 @@ const PreviewActions = ({ id, toggleSendInvoiceDrawer, toggleAddPaymentDrawer })
           color='secondary'
           href={`/apps/invoice/edit/${id}`}
         >
-          Edit Invoice
+          수정하기
         </Button>
-        <Button fullWidth variant='contained' sx={{ '& svg': { mr: 2 } }} onClick={toggleAddPaymentDrawer}>
+        {/* <Button fullWidth variant='contained' sx={{ '& svg': { mr: 2 } }} onClick={toggleAddPaymentDrawer}>
           <Icon fontSize='1.125rem' icon='tabler:currency-dollar' />
-          Add Payment
-        </Button>
+          결제 추가
+        </Button> */}
       </CardContent>
     </Card>
   )

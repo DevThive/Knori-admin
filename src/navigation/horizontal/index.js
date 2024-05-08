@@ -32,6 +32,11 @@ const navigation = () => {
           path: '/apps/notice'
         },
         {
+          title: 'classes',
+          icon: 'pepicons-pencil:bulletin-notice',
+          path: '/apps/class'
+        },
+        {
           title: 'Email',
           icon: 'tabler:mail',
           path: '/apps/email'
@@ -40,6 +45,28 @@ const navigation = () => {
           title: 'Chat',
           icon: 'tabler:messages',
           path: '/apps/chat'
+        }
+
+        // {
+        //   title: 'Calendar',
+        //   icon: 'tabler:calendar',
+        //   path: '/apps/calendar'
+        // },
+      ]
+    },
+    {
+      icon: 'tabler:layout-grid-add',
+      title: '예약',
+      children: [
+        {
+          title: '예약현황',
+          icon: 'tabler:calendar',
+          path: '/apps/reservation'
+        },
+        {
+          title: '이전예약',
+          icon: 'tabler:calendar',
+          path: '/apps/reservation-success'
         },
         {
           title: 'Calendar',
@@ -49,75 +76,19 @@ const navigation = () => {
         {
           title: 'Invoice',
           icon: 'tabler:file-dollar',
-          children: [
-            {
-              title: 'List',
-              path: '/apps/invoice/list'
-            },
-            {
-              title: 'Preview',
-              path: '/apps/invoice/preview'
-            },
-            {
-              title: 'Edit',
-              path: '/apps/invoice/edit'
-            },
-            {
-              title: 'Add',
-              path: '/apps/invoice/add'
-            }
-          ]
+          path: '/apps/invoice/list'
         }
-
-        // {
-        //   title: 'User',
-        //   icon: 'tabler:user',
-        //   children: [
-        //     {
-        //       title: 'List',
-        //       path: '/apps/user/list'
-        //     },
-        //     {
-        //       title: 'View',
-        //       children: [
-        //         {
-        //           title: 'Account',
-        //           path: '/apps/user/view/account'
-        //         },
-        //         {
-        //           title: 'Security',
-        //           path: '/apps/user/view/security'
-        //         },
-        //         {
-        //           title: 'Billing & Plans',
-        //           path: '/apps/user/view/billing-plan'
-        //         },
-        //         {
-        //           title: 'Notifications',
-        //           path: '/apps/user/view/notification'
-        //         },
-        //         {
-        //           title: 'Connection',
-        //           path: '/apps/user/view/connection'
-        //         }
-        //       ]
-        //     }
-        //   ]
-        // },
-        // {
-        //   title: 'Roles & Permissions',
-        //   icon: 'tabler:settings',
-        //   children: [
-        //     {
-        //       title: 'Roles',
-        //       path: '/apps/roles'
-        //     },
-        //     {
-        //       title: 'Permissions',
-        //       path: '/apps/permissions'
-        //     }
-        //   ]
-        // }
+      ]
+    },
+    {
+      title: '문의 & FAQ',
+      icon: 'tabler:checkbox',
+      children: [
+        {
+          title: '문의',
+          path: '/apps/contact',
+          icon: 'tabler:help'
+        }
       ]
     },
     {

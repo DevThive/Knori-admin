@@ -40,7 +40,7 @@ const AddActions = () => {
               variant='tonal'
               component={Link}
               color='secondary'
-              href='/apps/invoice/preview/4987'
+              href='/apps/invoice/preview/20'
             >
               Preview
             </Button>

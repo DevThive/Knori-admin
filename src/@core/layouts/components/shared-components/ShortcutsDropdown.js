@@ -113,12 +113,12 @@ const ShortcutsDropdown = props => {
               '& svg': { color: 'text.secondary' }
             }}
           >
-            <Typography variant='h5'>Shortcuts</Typography>
-            <Tooltip title='Add Shortcut' placement='top'>
+            <Typography variant='h5'>바로가기</Typography>
+            {/* <Tooltip title='Add Shortcut' placement='top'>
               <IconButton size='small'>
                 <Icon fontSize='1.5rem' icon='tabler:apps' />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
           </Box>
         </MenuItem>
         <Divider sx={{ my: '0 !important' }} />

@@ -60,19 +60,19 @@ const invoiceStatusObj = {
 
 // ** renders client column
 const renderClient = row => {
-  if (row.avatar.length) {
-    return <CustomAvatar src={row.avatar} sx={{ mr: 2.5, width: 38, height: 38 }} />
-  } else {
-    return (
-      <CustomAvatar
-        skin='light'
-        color={row.avatarColor || 'primary'}
-        sx={{ mr: 2.5, width: 38, height: 38, fontWeight: 500, fontSize: theme => theme.typography.body1.fontSize }}
-      >
-        {getInitials(row.name || 'John Doe')}
-      </CustomAvatar>
-    )
-  }
+  // if (row.avatar.length) {
+  //   return <CustomAvatar src={row.avatar} sx={{ mr: 2.5, width: 38, height: 38 }} />
+  // } else {
+  //   return (
+  //     <CustomAvatar
+  //       skin='light'
+  //       color={row.avatarColor || 'primary'}
+  //       sx={{ mr: 2.5, width: 38, height: 38, fontWeight: 500, fontSize: theme => theme.typography.body1.fontSize }}
+  //     >
+  //       {getInitials(row.name || 'John Doe')}
+  //     </CustomAvatar>
+  //   )
+  // }
 }
 
 const defaultColumns = [
@@ -86,46 +86,10 @@ const defaultColumns = [
     )
   },
   {
-    flex: 0.1,
-    minWidth: 80,
-    field: 'invoiceStatus',
-    renderHeader: () => <Icon icon='tabler:trending-up' />,
-    renderCell: ({ row }) => {
-      const { dueDate, balance, invoiceStatus } = row
-      const color = invoiceStatusObj[invoiceStatus] ? invoiceStatusObj[invoiceStatus].color : 'primary'
-
-      return (
-        <Tooltip
-          title={
-            <div>
-              <Typography variant='caption' sx={{ color: 'common.white', fontWeight: 600 }}>
-                {invoiceStatus}
-              </Typography>
-              <br />
-              <Typography variant='caption' sx={{ color: 'common.white', fontWeight: 600 }}>
-                Balance:
-              </Typography>{' '}
-              {balance}
-              <br />
-              <Typography variant='caption' sx={{ color: 'common.white', fontWeight: 600 }}>
-                Due Date:
-              </Typography>{' '}
-              {dueDate}
-            </div>
-          }
-        >
-          <CustomAvatar skin='light' color={color} sx={{ width: '1.875rem', height: '1.875rem' }}>
-            <Icon icon={invoiceStatusObj[invoiceStatus].icon} />
-          </CustomAvatar>
-        </Tooltip>
-      )
-    }
-  },
-  {
     flex: 0.25,
     field: 'name',
     minWidth: 320,
-    headerName: 'Client',
+    headerName: '고객명',
     renderCell: ({ row }) => {
       const { name, companyEmail } = row
 
@@ -148,30 +112,22 @@ const defaultColumns = [
     flex: 0.1,
     minWidth: 100,
     field: 'total',
-    headerName: 'Total',
-    renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}>{`$${row.total || 0}`}</Typography>
+    headerName: '총액',
+    renderCell: ({ row }) => (
+      <Typography sx={{ color: 'text.secondary' }}>{`${row.totalPeople * 18000 || 0}원`}</Typography>
+    )
   },
   {
     flex: 0.15,
     minWidth: 140,
     field: 'issuedDate',
-    headerName: 'Issued Date',
-    renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}>{row.issuedDate}</Typography>
-  },
-  {
-    flex: 0.1,
-    minWidth: 100,
-    field: 'balance',
-    headerName: 'Balance',
-    renderCell: ({ row }) => {
-      return row.balance !== 0 ? (
-        <Typography sx={{ color: 'text.secondary' }}>{row.balance}</Typography>
-      ) : (
-        <CustomChip rounded size='small' skin='light' color='success' label='Paid' />
-      )
-    }
+    headerName: '발행일',
+    renderCell: ({ row }) => (
+      <Typography sx={{ color: 'text.secondary' }}>{new Date(row.issuedDate).toLocaleDateString()}</Typography>
+    )
   }
 ]
+
 /* eslint-disable */
 const CustomInput = forwardRef((props, ref) => {
   const startDate = props.start !== null ? format(props.start, 'MM/dd/yyyy') : ''
@@ -231,15 +187,10 @@ const InvoiceList = () => {
       minWidth: 140,
       sortable: false,
       field: 'actions',
-      headerName: 'Actions',
+      headerName: 'ETC',
       renderCell: ({ row }) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Tooltip title='Delete Invoice'>
-            <IconButton size='small' sx={{ color: 'text.secondary' }} onClick={() => dispatch(deleteInvoice(row.id))}>
-              <Icon icon='tabler:trash' />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title='View'>
+          <Tooltip title='자세히보기'>
             <IconButton
               size='small'
               component={Link}
@@ -249,6 +200,11 @@ const InvoiceList = () => {
               <Icon icon='tabler:eye' />
             </IconButton>
           </Tooltip>
+          <Tooltip title='수정'>
+            <IconButton size='small' sx={{ color: 'text.secondary' }} href={`/apps/invoice/edit/${row.id}`}>
+              <Icon icon='tabler:edit' />
+            </IconButton>
+          </Tooltip>
           <OptionsMenu
             menuProps={{ sx: { '& .MuiMenuItem-root svg': { mr: 2 } } }}
             iconButtonProps={{ size: 'small', sx: { color: 'text.secondary' } }}
@@ -256,15 +212,6 @@ const InvoiceList = () => {
               {
                 text: 'Download',
                 icon: <Icon icon='tabler:download' fontSize={20} />
-              },
-              {
-                text: 'Edit',
-                href: `/apps/invoice/edit/${row.id}`,
-                icon: <Icon icon='tabler:edit' fontSize={20} />
-              },
-              {
-                text: 'Duplicate',
-                icon: <Icon icon='tabler:copy' fontSize={20} />
               }
             ]}
           />
@@ -278,25 +225,9 @@ const InvoiceList = () => {
       <Grid container spacing={6}>
         <Grid item xs={12}>
           <Card>
-            <CardHeader title='Filters' />
+            <CardHeader title='필터' />
             <CardContent>
               <Grid container spacing={6}>
-                <Grid item xs={12} sm={6}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label='Invoice Status'
-                    SelectProps={{ value: statusValue, onChange: e => handleStatusValue(e) }}
-                  >
-                    <MenuItem value=''>None</MenuItem>
-                    <MenuItem value='downloaded'>Downloaded</MenuItem>
-                    <MenuItem value='draft'>Draft</MenuItem>
-                    <MenuItem value='paid'>Paid</MenuItem>
-                    <MenuItem value='partial payment'>Partial Payment</MenuItem>
-                    <MenuItem value='past due'>Past Due</MenuItem>
-                    <MenuItem value='sent'>Sent</MenuItem>
-                  </CustomTextField>
-                </Grid>
                 <Grid item xs={12} sm={6}>
                   <DatePicker
                     isClearable
@@ -312,7 +243,7 @@ const InvoiceList = () => {
                       <CustomInput
                         dates={dates}
                         setDates={setDates}
-                        label='Invoice Date'
+                        label='날짜'
                         end={endDateRange}
                         start={startDateRange}
                       />

@@ -51,7 +51,7 @@ const TableHeader = props => {
           onChange={e => handleFilter(e.target.value)}
         />
         <Button sx={{ mb: 2 }} component={Link} variant='contained' href='/apps/invoice/add'>
-          Create Invoice
+          추가하기
         </Button>
       </Box>
     </Box>

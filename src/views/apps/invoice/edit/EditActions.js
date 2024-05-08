@@ -24,7 +24,7 @@ const OptionsWrapper = styled(Box)(() => ({
   justifyContent: 'space-between'
 }))
 
-const EditActions = ({ id, toggleSendInvoiceDrawer, toggleAddPaymentDrawer }) => {
+const EditActions = ({ onSave, id, toggleSendInvoiceDrawer, toggleAddPaymentDrawer }) => {
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -32,25 +32,32 @@ const EditActions = ({ id, toggleSendInvoiceDrawer, toggleAddPaymentDrawer }) =>
           <CardContent>
             <Button fullWidth variant='contained' onClick={toggleSendInvoiceDrawer} sx={{ mb: 2, '& svg': { mr: 2 } }}>
               <Icon fontSize='1.125rem' icon='tabler:send' />
-              Send Invoice
+              메일 전송
             </Button>
-            <Box sx={{ mb: 2, gap: 4, display: 'flex', alignItems: 'center' }}>
-              <Button fullWidth variant='tonal' component={Link} color='secondary' href={`/apps/invoice/preview/${id}`}>
-                Preview
-              </Button>
-              <Button fullWidth color='secondary' variant='tonal'>
-                Save
-              </Button>
-            </Box>
-            <Button fullWidth variant='contained' sx={{ '& svg': { mr: 2 } }} onClick={toggleAddPaymentDrawer}>
+
+            <Button
+              fullWidth
+              variant='tonal'
+              component={Link}
+              color='secondary'
+              href={`/apps/invoice/preview/${id}`}
+              sx={{ mb: 2, '& svg': { mr: 2 } }}
+            >
+              자세히보기
+            </Button>
+            <Button fullWidth color='secondary' onClick={onSave} variant='tonal' sx={{ mb: 2, '& svg': { mr: 2 } }}>
+              저장하기
+            </Button>
+
+            {/* <Button fullWidth variant='contained' sx={{ '& svg': { mr: 2 } }} onClick={toggleAddPaymentDrawer}>
               <Icon fontSize='1.125rem' icon='tabler:currency-dollar' />
               Add Payment
-            </Button>
+            </Button> */}
           </CardContent>
         </Card>
       </Grid>
 
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <CustomTextField
           select
           fullWidth
@@ -88,7 +95,7 @@ const EditActions = ({ id, toggleSendInvoiceDrawer, toggleAddPaymentDrawer }) =>
           </InputLabel>
           <Switch id='invoice-edit-payment-stub' />
         </OptionsWrapper>
-      </Grid>
+      </Grid> */}
     </Grid>
   )
 }
