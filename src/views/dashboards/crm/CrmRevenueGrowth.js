@@ -1,9 +1,13 @@
 // ** MUI Imports
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
+
+import authConfig from 'src/configs/auth'
 
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
@@ -12,11 +16,53 @@ import ReactApexcharts from 'src/@core/components/react-apexcharts'
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 
-const series = [{ data: [32, 52, 72, 94, 116, 94, 72] }]
-
 const CrmRevenueGrowth = () => {
-  // ** Hook
   const theme = useTheme()
+
+  // 상태 추가
+  const [bookingData, setBookingData] = useState([])
+  const [todayBookings, setTodayBookings] = useState(0)
+
+  // 현재 주를 계산하는 함수
+  // const getCurrentWeek = () => {
+  //   const currentDate = new Date()
+  //   const startOfYear = new Date(currentDate.getFullYear(), 0, 1)
+  //   const pastDaysOfYear = (currentDate - startOfYear) / 86400000
+
+  //   return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7)
+  // }
+
+  useEffect(() => {
+    // API에서 데이터를 가져오는 함수
+    const fetchData = async () => {
+      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+      try {
+        const response = await axios.get(`https://api.knori.or.kr/dashboard/completedreservation/week`, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          }
+        })
+
+        // 응답 데이터 형식 가정: { weeklyBookings: [32, 52, ...], todayBookings: 120 }
+        setBookingData(response.data.revenue.weeklyBookings)
+        setTodayBookings(response.data.revenue.todayBookings)
+      } catch (error) {
+        console.error('데이터를 가져오는 데 실패했습니다.', error)
+      }
+    }
+
+    fetchData()
+
+    // 매주 자동으로 데이터를 새로고침하기 위한 인터벌 설정
+    const interval = setInterval(fetchData, 604800000) // 604800000ms = 7일
+
+    // 컴포넌트가 언마운트될 때 인터벌을 정리
+    return () => clearInterval(interval)
+  }, []) // 빈 의존성 배열 => 컴포넌트 마운트 시 한 번만 실행
+
+  // 시리즈와 옵션 정의...
+  const series = [{ data: bookingData }]
 
   const options = {
     chart: {
@@ -62,7 +108,7 @@ const CrmRevenueGrowth = () => {
       }
     },
     xaxis: {
-      categories: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      categories: ['월', '화', '수', '목', '금', '토', '일'], // 요일을 한국어로 변경
       axisTicks: { show: false },
       axisBorder: { show: false },
       tickPlacement: 'on',
@@ -84,15 +130,16 @@ const CrmRevenueGrowth = () => {
           <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               <Typography variant='h5' sx={{ mb: 2 }}>
-                Revenue Growth
+                주간 예약 현황
               </Typography>
-              <Typography variant='body2'>Weekly Report</Typography>
+              <Typography variant='body2'>주간 보고서</Typography>
             </div>
             <div>
               <Typography variant='h3' sx={{ mb: 2 }}>
-                $4,673
+                {todayBookings} 예약
               </Typography>
-              <CustomChip rounded size='small' skin='light' color='success' label='+15.2%' />
+              {/* <CustomChip rounded size='small' skin='light' color='success' label='+15.2%' />{' '} */}
+              {/* 이 부분은 예약 증가율에 따라 동적으로 변경될 수 있습니다. */}
             </div>
           </Box>
           <ReactApexcharts type='bar' width={160} height={170} series={series} options={options} />

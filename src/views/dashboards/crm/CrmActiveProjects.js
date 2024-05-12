@@ -58,7 +58,7 @@ const CrmActiveProjects = () => {
   return (
     <Card>
       <CardHeader
-        title='Active Projects'
+        title='클래스 이용자 수'
         subheader='Average 72% completed'
         action={
           <OptionsMenu

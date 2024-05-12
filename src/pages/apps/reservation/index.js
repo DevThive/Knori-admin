@@ -292,7 +292,7 @@ const TableColumns = () => {
     const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
     try {
       // Axios를 사용하여 API 요청을 보냄
-      const response = await axios.get('https://api.knori.or.kr/reservation/admin', {
+      const response = await axios.get('https://api.knori.or.kr/reservation/adminFindAll', {
         headers: {
           Authorization: `Bearer ${storedToken}`
         }
