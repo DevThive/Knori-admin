@@ -1,22 +1,83 @@
-// ** MUI Imports
-import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import { useTheme } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
-import CardContent from '@mui/material/CardContent'
+// MUI 및 기타 필수 라이브러리 임포트
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import { Box, Card, Typography, CardContent, useTheme } from '@mui/material'
 
-// ** Custom Components Imports
+// 구성 및 커스텀 컴포넌트 임포트
+import authConfig from 'src/configs/auth'
 import CustomChip from 'src/@core/components/mui/chip'
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
 
-// ** Util Import
+// 유틸리티 임포트
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 
-const series = [{ data: [32, 52, 72, 94, 116, 94, 72] }]
-
 const CrmRevenueGrowth = () => {
-  // ** Hook
   const theme = useTheme()
+
+  // 상태 관리
+  const [bookingData, setBookingData] = useState([])
+  const [todayBookings, setTodayBookings] = useState(0)
+  const [week, setWeek] = useState(getCurrentWeek())
+
+  // 컴포넌트 내에서 현재 주 범위 상태 관리 추가
+  const [currentWeekRange, setCurrentWeekRange] = useState(getCurrentWeekRange())
+
+  // 현재 주 계산
+  function getCurrentWeek() {
+    const currentDate = new Date()
+    const startOfYear = new Date(currentDate.getFullYear(), 0, 1)
+    const pastDaysOfYear = (currentDate - startOfYear) / 86400000
+
+    return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7)
+  }
+
+  // 현재 주의 범위를 계산하는 함수 추가
+  function getCurrentWeekRange() {
+    const currentDate = new Date()
+    const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1)
+    const days = Math.floor((currentDate - firstDayOfYear) / (24 * 60 * 60 * 1000))
+    const weekNumber = Math.ceil((currentDate.getDay() + 1 + days) / 7)
+
+    const startOfWeek = new Date(
+      currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 1 + (weekNumber - week) * 7)
+    )
+    const endOfWeek = new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000)
+
+    const startOfWeekFormatted = `${startOfWeek.getFullYear()}-${startOfWeek.getMonth() + 1}-${startOfWeek.getDate()}`
+    const endOfWeekFormatted = `${endOfWeek.getFullYear()}-${endOfWeek.getMonth() + 1}-${endOfWeek.getDate()}`
+
+    return `${startOfWeekFormatted} ~ ${endOfWeekFormatted}`
+  }
+
+  // 이전 및 다음 주 이동 함수
+  const goToPreviousWeek = () => setWeek(week - 1)
+  const goToNextWeek = () => setWeek(week + 1)
+
+  useEffect(() => {
+    async function fetchData(day) {
+      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+      try {
+        const response = await axios.get(`http://localhost:4000/dashboard/completedreservation/week/${day}`, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          }
+        })
+
+        // 예시 응답 데이터: { weeklyBookings: [32, 52, ...], todayBookings: 120 }
+        setBookingData(response.data.revenue.weeklyBookings)
+        setTodayBookings(response.data.revenue.todayBookings)
+      } catch (error) {
+        console.error('데이터를 가져오는 데 실패했습니다.', error)
+      }
+    }
+
+    fetchData(week)
+    setCurrentWeekRange(getCurrentWeekRange())
+  }, [week])
+
+  // 차트 시리즈 및 옵션 설정
+  const series = [{ data: bookingData }]
 
   const options = {
     chart: {
@@ -52,20 +113,11 @@ const CrmRevenueGrowth = () => {
         filter: { type: 'none' }
       }
     },
-    grid: {
-      show: false,
-      padding: {
-        top: -4,
-        left: -7,
-        right: -5,
-        bottom: -12
-      }
-    },
+    grid: { show: false },
     xaxis: {
-      categories: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      categories: ['월', '화', '수', '목', '금', '토', '일'],
       axisTicks: { show: false },
       axisBorder: { show: false },
-      tickPlacement: 'on',
       labels: {
         style: {
           colors: theme.palette.text.disabled,
@@ -83,16 +135,21 @@ const CrmRevenueGrowth = () => {
         <Box sx={{ gap: 2, display: 'flex', alignItems: 'stretch', justifyContent: 'space-between' }}>
           <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
+              {/* 주간 이동 버튼 */}
+              <div style={{ textAlign: 'right' }}>
+                <button onClick={goToPreviousWeek}>이전 주</button>
+                <button onClick={goToNextWeek}>다음 주</button>
+              </div>
               <Typography variant='h5' sx={{ mb: 2 }}>
-                Revenue Growth
+                주간 예약 현황
               </Typography>
-              <Typography variant='body2'>Weekly Report</Typography>
+              <Typography variant='body2'>주간 보고서 ({currentWeekRange})</Typography>{' '}
             </div>
             <div>
               <Typography variant='h3' sx={{ mb: 2 }}>
-                $4,673
+                {todayBookings} 예약
               </Typography>
-              <CustomChip rounded size='small' skin='light' color='success' label='+15.2%' />
+              {/* 예약 증가율에 따른 동적 컴포넌트 필요 */}
             </div>
           </Box>
           <ReactApexcharts type='bar' width={160} height={170} series={series} options={options} />
