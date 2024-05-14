@@ -1,50 +1,70 @@
-// ** MUI Imports
+// MUI 및 기타 필수 라이브러리 임포트
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import { useTheme } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
-import CardContent from '@mui/material/CardContent'
+import { Box, Card, Typography, CardContent, useTheme } from '@mui/material'
 
+// 구성 및 커스텀 컴포넌트 임포트
 import authConfig from 'src/configs/auth'
-
-// ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
 
-// ** Util Import
+// 유틸리티 임포트
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 
 const CrmRevenueGrowth = () => {
   const theme = useTheme()
 
-  // 상태 추가
+  // 상태 관리
   const [bookingData, setBookingData] = useState([])
   const [todayBookings, setTodayBookings] = useState(0)
+  const [week, setWeek] = useState(getCurrentWeek())
 
-  // 현재 주를 계산하는 함수
-  // const getCurrentWeek = () => {
-  //   const currentDate = new Date()
-  //   const startOfYear = new Date(currentDate.getFullYear(), 0, 1)
-  //   const pastDaysOfYear = (currentDate - startOfYear) / 86400000
+  // 컴포넌트 내에서 현재 주 범위 상태 관리 추가
+  const [currentWeekRange, setCurrentWeekRange] = useState(getCurrentWeekRange())
 
-  //   return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7)
-  // }
+  // 현재 주 계산
+  function getCurrentWeek() {
+    const currentDate = new Date()
+    const startOfYear = new Date(currentDate.getFullYear(), 0, 1)
+    const pastDaysOfYear = (currentDate - startOfYear) / 86400000
+
+    return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7)
+  }
+
+  // 현재 주의 범위를 계산하는 함수 추가
+  function getCurrentWeekRange() {
+    const currentDate = new Date()
+    const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1)
+    const days = Math.floor((currentDate - firstDayOfYear) / (24 * 60 * 60 * 1000))
+    const weekNumber = Math.ceil((currentDate.getDay() + 1 + days) / 7)
+
+    const startOfWeek = new Date(
+      currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 1 + (weekNumber - week) * 7)
+    )
+    const endOfWeek = new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000)
+
+    const startOfWeekFormatted = `${startOfWeek.getFullYear()}-${startOfWeek.getMonth() + 1}-${startOfWeek.getDate()}`
+    const endOfWeekFormatted = `${endOfWeek.getFullYear()}-${endOfWeek.getMonth() + 1}-${endOfWeek.getDate()}`
+
+    return `${startOfWeekFormatted} ~ ${endOfWeekFormatted}`
+  }
+
+  // 이전 및 다음 주 이동 함수
+  const goToPreviousWeek = () => setWeek(week - 1)
+  const goToNextWeek = () => setWeek(week + 1)
 
   useEffect(() => {
-    // API에서 데이터를 가져오는 함수
-    const fetchData = async () => {
+    async function fetchData(day) {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
       try {
-        const response = await axios.get(`https://api.knori.or.kr/dashboard/completedreservation/week`, {
+        const response = await axios.get(`http://localhost:4000/dashboard/completedreservation/week/${day}`, {
           headers: {
             Authorization: `Bearer ${storedToken}`
           }
         })
 
-        // 응답 데이터 형식 가정: { weeklyBookings: [32, 52, ...], todayBookings: 120 }
+        // 예시 응답 데이터: { weeklyBookings: [32, 52, ...], todayBookings: 120 }
         setBookingData(response.data.revenue.weeklyBookings)
         setTodayBookings(response.data.revenue.todayBookings)
       } catch (error) {
@@ -52,16 +72,11 @@ const CrmRevenueGrowth = () => {
       }
     }
 
-    fetchData()
+    fetchData(week)
+    setCurrentWeekRange(getCurrentWeekRange())
+  }, [week])
 
-    // 매주 자동으로 데이터를 새로고침하기 위한 인터벌 설정
-    const interval = setInterval(fetchData, 604800000) // 604800000ms = 7일
-
-    // 컴포넌트가 언마운트될 때 인터벌을 정리
-    return () => clearInterval(interval)
-  }, []) // 빈 의존성 배열 => 컴포넌트 마운트 시 한 번만 실행
-
-  // 시리즈와 옵션 정의...
+  // 차트 시리즈 및 옵션 설정
   const series = [{ data: bookingData }]
 
   const options = {
@@ -98,20 +113,11 @@ const CrmRevenueGrowth = () => {
         filter: { type: 'none' }
       }
     },
-    grid: {
-      show: false,
-      padding: {
-        top: -4,
-        left: -7,
-        right: -5,
-        bottom: -12
-      }
-    },
+    grid: { show: false },
     xaxis: {
-      categories: ['월', '화', '수', '목', '금', '토', '일'], // 요일을 한국어로 변경
+      categories: ['월', '화', '수', '목', '금', '토', '일'],
       axisTicks: { show: false },
       axisBorder: { show: false },
-      tickPlacement: 'on',
       labels: {
         style: {
           colors: theme.palette.text.disabled,
@@ -129,17 +135,21 @@ const CrmRevenueGrowth = () => {
         <Box sx={{ gap: 2, display: 'flex', alignItems: 'stretch', justifyContent: 'space-between' }}>
           <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
+              {/* 주간 이동 버튼 */}
+              <div style={{ textAlign: 'right' }}>
+                <button onClick={goToPreviousWeek}>이전 주</button>
+                <button onClick={goToNextWeek}>다음 주</button>
+              </div>
               <Typography variant='h5' sx={{ mb: 2 }}>
                 주간 예약 현황
               </Typography>
-              <Typography variant='body2'>주간 보고서</Typography>
+              <Typography variant='body2'>주간 보고서 ({currentWeekRange})</Typography>{' '}
             </div>
             <div>
               <Typography variant='h3' sx={{ mb: 2 }}>
                 {todayBookings} 예약
               </Typography>
-              {/* <CustomChip rounded size='small' skin='light' color='success' label='+15.2%' />{' '} */}
-              {/* 이 부분은 예약 증가율에 따라 동적으로 변경될 수 있습니다. */}
+              {/* 예약 증가율에 따른 동적 컴포넌트 필요 */}
             </div>
           </Box>
           <ReactApexcharts type='bar' width={160} height={170} series={series} options={options} />
