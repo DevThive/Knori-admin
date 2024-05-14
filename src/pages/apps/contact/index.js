@@ -79,17 +79,32 @@ const ContactList = () => {
 
   const handleAnswerSubmit = async id => {
     const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
-    try {
-
-
-      const
-    } catch {}
-
-    // 답변 제출 로직 구현, 예시:
     const answer = answers[id]
-    console.log(`Submitting answer for contact ID ${id}: ${answer}`)
+    try {
+      const response = await axios.patch(
+        `https://api.knori.or.kr/contact/${id}`,
+        { contact_answer: answer },
+        { headers: { Authorization: `Bearer ${storedToken}` } }
+      )
 
-    // 서버로 답변 제출하기
+      // 성공적인 응답 처리
+      console.log('답변이 성공적으로 제출되었습니다.', response.data)
+
+      // 여기에 상태 업데이트 로직 추가
+      // 예: 답변이 성공적으로 제출된 문의사항을 UI에서 표시하기 위해 contact 상태 업데이트
+      setContact(prevContacts =>
+        prevContacts.map(contact => {
+          if (contact.id === id) {
+            return { ...contact, contact_answer: answer } // 문의사항에 답변 추가
+          }
+
+          return contact
+        })
+      )
+    } catch (error) {
+      // 예외 처리 강화
+      console.error('답변 제출 중 오류가 발생했습니다.', error)
+    }
   }
 
   return (
