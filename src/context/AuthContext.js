@@ -33,29 +33,50 @@ const AuthProvider = ({ children }) => {
   const router = useRouter()
 
   useEffect(() => {
-    const initAuth = async () => {
-      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
-      if (storedToken) {
-        setLoading(true)
-        try {
-          const response = await axios.get(authConfig.meEndpoint, {
-            headers: {
-              Authorization: `Bearer ${storedToken}`
-            }
-          })
-          setUser({ ...response.data })
-        } catch (error) {
-          console.error(error)
-          setError('로그인 정보를 가져오는데 실패했습니다.')
-          handleLogout() // 실패 시 로그아웃 처리
-        }
-        setLoading(false)
-      } else {
+    const initAuth = async token => {
+      setLoading(true)
+      try {
+        const response = await axios.get(authConfig.meEndpoint, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        setUser({ ...response.data })
+      } catch (error) {
+        console.error(error)
+        setError('로그인 정보를 가져오는데 실패했습니다.')
+        handleLogout() // 실패 시 로그아웃 처리
+      } finally {
         setLoading(false)
       }
     }
-    initAuth()
-  }, [router])
+
+    const handleMessage = async event => {
+      if (event.data.token) {
+        console.log(event.data.token)
+
+        // 메시지로 받은 토큰 처리
+        await initAuth(event.data.token)
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+
+    // URL 또는 로컬 스토리지에서 토큰 가져오기
+    const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+    if (storedToken) {
+      initAuth(storedToken)
+    } else {
+      // 토큰이 없으면 로딩 상태를 false로 설정
+      setLoading(false)
+    }
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
+  }, [router]) // 필요한 의존성을 배열에 추가
 
   const handleLogin = async (params, errorCallback) => {
     try {

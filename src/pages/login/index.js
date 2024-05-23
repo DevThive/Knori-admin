@@ -126,6 +126,17 @@ const LoginPage = () => {
   }
   const imageSource = skin === 'bordered' ? 'auth-v2-login-illustration-bordered' : 'auth-v2-login-illustration'
 
+  const handleGoogleLogin = e => {
+    e.preventDefault()
+    const width = 500
+    const height = 600
+    const left = (window.innerWidth - width) / 2
+    const top = (window.innerHeight - height) / 2
+    const googleAuthUrl = 'http://localhost:4001/auth/google'
+
+    window.open(googleAuthUrl, 'Google Login', `width=${width},height=${height},top=${top},left=${left}`)
+  }
+
   return (
     <Box className='content-right' sx={{ backgroundColor: 'background.paper' }}>
       {!hidden ? (
@@ -305,12 +316,7 @@ const LoginPage = () => {
                 >
                   <Icon icon='mdi:github' />
                 </IconButton>
-                <IconButton
-                  href='https://api.knori.or.kr/auth/google'
-                  component={Link}
-                  sx={{ color: '#db4437' }}
-                  onClick={e => e.preventDefault()}
-                >
+                <IconButton sx={{ color: '#db4437' }} onClick={handleGoogleLogin}>
                   <Icon icon='mdi:google' />
                 </IconButton>
               </Box>
