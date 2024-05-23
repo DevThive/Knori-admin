@@ -70,7 +70,8 @@ const InvoicePrint = ({ id }) => {
   }, [id])
   if (data) {
     const { invoice, paymentDetails } = data
-    console.log(data)
+
+    // console.log(data)
     const totalAmount = data.invoiceItems.reduce((acc, item) => acc + item.people * item.price, 0)
 
     return (

@@ -176,6 +176,19 @@ const MailDetails = props => {
     }
   }
 
+  const formatDate = date => {
+    const d = new Date(date)
+    let month = '' + (d.getMonth() + 1) // 월은 0부터 시작하므로 1을 더해줍니다.
+    let day = '' + d.getDate()
+    const year = d.getFullYear()
+
+    // 한 자리 수 월과 일에는 앞에 0을 붙여줍니다.
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+
+    return [year, month, day].join('-')
+  }
+
   return (
     <Sidebar
       hideBackdrop
@@ -473,8 +486,8 @@ const MailDetails = props => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Typography variant='body2' sx={{ mr: 3, color: 'text.disabled' }}>
-                          {new Date(mail.time).toDateString()}{' '}
-                          {new Date(mail.time).toLocaleTimeString('en-US', {
+                          {formatDate(mail.time)}{' '}
+                          {new Date(mail.time).toLocaleTimeString('ko-KR', {
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: true

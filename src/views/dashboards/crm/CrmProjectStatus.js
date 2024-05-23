@@ -5,6 +5,8 @@ import { useTheme } from '@mui/material/styles'
 import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
+import React, { useState } from 'react' // useState를 import합니다.
+import Collapse from '@mui/material/Collapse' // Collapse 컴포넌트를 import합니다.
 
 // ** Custom Components Import
 import Icon from 'src/@core/components/icon'
@@ -22,17 +24,20 @@ const data = [
     trend: 'negative',
     amount: '$756.26',
     trendDiff: 139.34
-  },
-  {
-    title: 'Podcasts',
-    trendDiff: 576.24,
-    amount: '$2,207.03'
   }
 ]
 
 const CrmProjectStatus = () => {
   // ** Hook
   const theme = useTheme()
+
+  // 차트 표시 상태를 관리하기 위한 state를 추가합니다.
+  const [isChartVisible, setIsChartVisible] = useState(true)
+
+  // 차트 표시 상태를 토글하는 함수입니다.
+  const toggleChartVisibility = () => {
+    setIsChartVisible(!isChartVisible)
+  }
 
   const options = {
     chart: {
@@ -96,12 +101,12 @@ const CrmProjectStatus = () => {
   return (
     <Card>
       <CardHeader
-        title='Project Status'
+        title='연간 매출 현황'
+        subheader={`${new Date().getFullYear() - 4} ~ ${new Date().getFullYear()}`}
         action={
-          <OptionsMenu
-            options={['Share', 'Refresh', 'Update']}
-            iconButtonProps={{ size: 'small', sx: { color: 'text.disabled' } }}
-          />
+          <Typography sx={{ cursor: 'pointer', color: 'text.secondary' }} onClick={toggleChartVisibility}>
+            {isChartVisible ? '숨기기' : '보기'}
+          </Typography>
         }
       />
       <CardContent sx={{ pb: 0 }}>
@@ -121,15 +126,15 @@ const CrmProjectStatus = () => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Typography variant='h6'>$4,3742</Typography>
-              <Typography variant='body2' sx={{ color: 'text.disabled' }}>
-                Your Earnings
-              </Typography>
+              <Typography variant='h6'>매출 현황</Typography>
+              <Typography variant='body2' sx={{ color: 'text.disabled' }}></Typography>
             </Box>
             <Typography sx={{ fontWeight: 500, color: 'success.main' }}>+10.2%</Typography>
           </Box>
         </Box>
-        <ReactApexcharts type='area' height={254} series={series} options={options} />
+        <Collapse in={isChartVisible}>
+          <ReactApexcharts type='area' height={254} series={series} options={options} />
+        </Collapse>
         {data.map((item, index) => (
           <Box
             key={index}

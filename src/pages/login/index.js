@@ -188,18 +188,18 @@ const LoginPage = () => {
               <Typography variant='h3' sx={{ mb: 1.5 }}>
                 {`Welcome to ${themeConfig.templateName}! 👋🏻`}
               </Typography>
-              <Typography sx={{ color: 'text.secondary' }}>
+              {/* <Typography sx={{ color: 'text.secondary' }}>
                 Please sign-in to your account and start the adventure
-              </Typography>
+              </Typography> */}
             </Box>
-            <Alert icon={false} sx={{ py: 3, mb: 6, ...bgColors.primaryLight, '& .MuiAlert-message': { p: 0 } }}>
+            {/* <Alert icon={false} sx={{ py: 3, mb: 6, ...bgColors.primaryLight, '& .MuiAlert-message': { p: 0 } }}>
               <Typography variant='body2' sx={{ mb: 2, color: 'primary.main' }}>
                 Admin: <strong>admin@vuexy.com</strong> / Pass: <strong>admin</strong>
               </Typography>
               <Typography variant='body2' sx={{ color: 'primary.main' }}>
                 Client: <strong>client@vuexy.com</strong> / Pass: <strong>client</strong>
               </Typography>
-            </Alert>
+            </Alert> */}
             <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
               <Box sx={{ mb: 4 }}>
                 <Controller
@@ -274,12 +274,12 @@ const LoginPage = () => {
               <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
                 Login
               </Button>
-              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {/* <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <Typography sx={{ color: 'text.secondary', mr: 2 }}>New on our platform?</Typography>
                 <Typography href='/register' component={LinkStyled}>
                   Create an account
                 </Typography>
-              </Box>
+              </Box> */}
               <Divider
                 sx={{
                   color: 'text.disabled',
@@ -305,7 +305,12 @@ const LoginPage = () => {
                 >
                   <Icon icon='mdi:github' />
                 </IconButton>
-                <IconButton href='/' component={Link} sx={{ color: '#db4437' }} onClick={e => e.preventDefault()}>
+                <IconButton
+                  href='https://api.knori.or.kr/auth/google'
+                  component={Link}
+                  sx={{ color: '#db4437' }}
+                  onClick={e => e.preventDefault()}
+                >
                   <Icon icon='mdi:google' />
                 </IconButton>
               </Box>

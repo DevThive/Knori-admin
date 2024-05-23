@@ -76,7 +76,7 @@ const Noticeeditor = props => {
   }
 
   useEffect(() => {
-    console.log(typeof file) // 이 로그는 file 상태가 변경될 때마다 출력됩니다.
+    // console.log(typeof file) // 이 로그는 file 상태가 변경될 때마다 출력됩니다.
   }, [file])
 
   const handleTitleChange = e => {

@@ -88,6 +88,11 @@ const navigation = () => {
           title: '문의',
           path: '/apps/contact',
           icon: 'tabler:help'
+        },
+        {
+          title: '예약 수정 요청',
+          path: '/apps/edit-reservation',
+          icon: 'tabler:edit'
         }
       ]
     },

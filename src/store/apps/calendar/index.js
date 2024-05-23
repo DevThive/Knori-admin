@@ -32,7 +32,7 @@ export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event, {
   }) // 데이터 구조 변경
   await dispatch(fetchEvents(['Personal', 'Business', 'Holiday']))
 
-  console.log(event)
+  // console.log(event)
 
   return response.data // 응답 데이터 구조에 따라 이 부분도 적절히 수정
 })
@@ -41,7 +41,7 @@ export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event, {
 export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (event, { dispatch }) => {
   const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
-  console.log(event.id, event.description)
+  // console.log(event.id, event.description)
 
   const response = await axios.put(`https://api.knori.or.kr/calendar/${event.id}`, event, {
     headers: {

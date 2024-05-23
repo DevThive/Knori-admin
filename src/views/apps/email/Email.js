@@ -56,7 +56,7 @@ const EmailAppLayout = ({ folder, label }) => {
   // ** Vars
   const leftSidebarWidth = 260
   const { skin, direction } = settings
-  const composePopupWidth = mdAbove ? 754 : smAbove ? 520 : '100%'
+  const composePopupWidth = mdAbove ? 770 : smAbove ? 540 : '100%'
 
   const routeParams = {
     label: label || '',

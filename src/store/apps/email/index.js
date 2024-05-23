@@ -4,11 +4,24 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 // ** Axios Imports
 import axios from 'axios'
 
+import authConfig from 'src/configs/auth'
+
 // ** Fetch Mails
 export const fetchMails = createAsyncThunk('appEmail/fetchMails', async params => {
-  const response = await axios.get('/apps/email/emails', {
-    params
-  })
+  const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+  const response = await axios.get(
+    '/apps/email/emails',
+    {
+      params
+    },
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${storedToken}`
+      }
+    }
+  )
 
   return { ...response.data, filter: params }
 })

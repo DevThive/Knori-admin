@@ -55,7 +55,7 @@ const CrmSessions = () => {
             }
           })
           .then(response => {
-            console.log(response.data)
+            // console.log(response.data)
             const dataLastYear = response.data // axios는 자동으로 JSON을 파싱합니다.
             setLastYearEarnings(dataLastYear) // 실제 데이터 구조에 맞게 경로를 수정해주세요.
           }) // API URL을 지난 년도에 맞게 수정합니다.
