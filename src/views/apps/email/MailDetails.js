@@ -82,6 +82,7 @@ const MailDetails = props => {
 
   // ** State
   const [showReplies, setShowReplies] = useState(false)
+  const [message, setMessage] = useState('')
 
   // ** Hook
   const { settings } = useSettings()
@@ -189,6 +190,62 @@ const MailDetails = props => {
     if (day.length < 2) day = '0' + day
 
     return [year, month, day].join('-')
+  }
+
+  function base64urlToBase64(input) {
+    // base64url을 base64 형태로 변환
+    let base64 = input.replace(/-/g, '+').replace(/_/g, '/')
+
+    // 패딩 추가
+    const pad = base64.length % 4
+    if (pad) {
+      if (pad === 1) {
+        throw new Error('Invalid base64url string')
+      }
+      base64 += '='.repeat(4 - pad)
+    }
+
+    return base64
+  }
+
+  function base64Decode(base64) {
+    if (typeof window !== 'undefined' && typeof window.atob === 'function') {
+      // 브라우저 환경
+      return window.atob(base64)
+    } else if (typeof Buffer !== 'undefined') {
+      // Node.js 환경
+      return Buffer.from(base64, 'base64').toString('binary')
+    } else {
+      throw new Error('No suitable base64 decode method found')
+    }
+  }
+
+  function decodeBase64Url(base64url) {
+    const base64 = base64urlToBase64(base64)
+    const binaryString = base64Decode(base64)
+
+    return decodeURIComponent(
+      binaryString
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        })
+        .join('')
+    )
+  }
+
+  // console.log('test : ', mail)
+
+  if (mail && mail.message) {
+    try {
+      const decodedContent = decodeBase64Url(mail.message)
+      const sanitizedMessage = DOMPurify.sanitize(decodedContent)
+      setMessage(sanitizedMessage)
+    } catch (error) {
+      console.error('디코딩 실패: ', error.message)
+    }
+  } else {
+    console.log('불러오기 실패')
   }
 
   return (
@@ -357,7 +414,9 @@ const MailDetails = props => {
 
                 {showReplies
                   ? mail.replies.map((reply, index) => {
-                      const sanitizedMessage = DOMPurify.sanitize(reply.message)
+                      console.log(reply.message)
+                      const decodedContent = decodeBase64Url(reply.message)
+                      const sanitizedMessage = DOMPurify.sanitize(decodedContent) // DOMPurify 추가
 
                       return (
                         <Box
@@ -402,7 +461,7 @@ const MailDetails = props => {
                                     hour12: true
                                   })}
                                 </Typography>
-                                {mail.attachments.length ? (
+                                {reply.attachments.length ? (
                                   <IconButton size='small'>
                                     <Icon icon='tabler:paperclip' fontSize={20} />
                                   </IconButton>
@@ -526,7 +585,11 @@ const MailDetails = props => {
                   </Box>
                   <Divider sx={{ m: '0 !important' }} />
                   <Box sx={{ px: 6 }}>
-                    <Box sx={{ color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: mail.message }} />
+                    {mail && mail.message ? (
+                      <Box sx={{ color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: message }} />
+                    ) : (
+                      <div>Failed to retrieve message</div>
+                    )}
                   </Box>
                   {mail.attachments.length ? (
                     <>

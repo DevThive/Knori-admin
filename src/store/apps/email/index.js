@@ -24,19 +24,6 @@ async function getGoogleApiToken() {
   }
 }
 
-// Base64 인코딩된 문자열을 디코딩하는 함수
-function decodeBase64(encodedString) {
-  // 서버 측에서 실행되는 경우
-  if (typeof window === 'undefined') {
-    return Buffer.from(encodedString.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString()
-  }
-
-  // 클라이언트 측에서 실행되는 경우
-  else {
-    return atob(encodedString.replace(/-/g, '+').replace(/_/g, '/'))
-  }
-}
-
 export const fetchMails = createAsyncThunk('appEmail/fetchMails', async params => {
   try {
     const googleApi = await getGoogleApiToken()
@@ -52,7 +39,9 @@ export const fetchMails = createAsyncThunk('appEmail/fetchMails', async params =
     }
 
     const mailListResponse = await axios.get(
-      `https://gmail.googleapis.com/gmail/v1/users/${googleApi.email}/messages?q=${encodeURIComponent(searchQuery)}`,
+      `https://gmail.googleapis.com/gmail/v1/users/${googleApi.email}/messages?q=${encodeURIComponent(
+        searchQuery
+      )}&maxResults=200`,
       {
         headers: {
           Authorization: `Bearer ${googleApi.accessToken}`
@@ -150,10 +139,6 @@ export const getCurrentMail = createAsyncThunk('appEmail/selectMail', async id =
 
     // console.log(messageDetailsResponse.data)
 
-    console.log(messageDetailsResponseRaw.data.raw)
-
-    const emailRawData = decodeBase64(messageDetailsResponseRaw.data.raw)
-
     const headers = messageDetailsResponse.data.payload.headers
     const subject = headers.find(header => header.name === 'Subject')?.value
     const fromHeader = headers.find(header => header.name === 'From')?.value
@@ -180,7 +165,7 @@ export const getCurrentMail = createAsyncThunk('appEmail/selectMail', async id =
       subject,
       cc: [],
       bcc: [],
-      message: emailRawData,
+      message: messageDetailsResponseRaw.data.raw,
       attachments: [],
       isStarred: false,
       labels: messageDetailsResponse.data.labelIds,
