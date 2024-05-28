@@ -31,16 +31,18 @@ const AuthProvider = ({ children }) => {
 
   // ** Hooks
   const router = useRouter()
-
   useEffect(() => {
     const initAuth = async () => {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
-      if (storedToken) {
+      const urlParams = new URLSearchParams(window.location.search)
+      const token = urlParams.get('token') || storedToken // URL의 token이 우선순위를 가짐
+
+      if (token) {
         setLoading(true)
         try {
           const response = await axios.get(authConfig.meEndpoint, {
             headers: {
-              Authorization: `Bearer ${storedToken}`
+              Authorization: `Bearer ${token}`
             }
           })
           setUser({ ...response.data })
@@ -55,7 +57,40 @@ const AuthProvider = ({ children }) => {
       }
     }
     initAuth()
+
+    // 필요한 의존성을 배열에 추가
   }, [router])
+
+  useEffect(() => {
+    // 메시지 리스너 등록
+    const handleToken = async event => {
+      if (event.data.token) {
+        const token = event.data.token
+        setLoading(true)
+        try {
+          const response = await axios.get(authConfig.meEndpoint, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
+          setUser({ ...response.data })
+          window.localStorage.setItem(authConfig.storageTokenKeyName, token) // 옵셔널: 토큰 저장
+          window.localStorage.setItem('userData', JSON.stringify(response.data))
+          window.location.href = '/'
+        } catch (error) {
+          console.error(error)
+          setError('로그인 정보를 가져오는데 실패했습니다.')
+        }
+        setLoading(false)
+      }
+    }
+
+    window.addEventListener('message', handleToken)
+
+    return () => {
+      window.removeEventListener('message', handleToken)
+    }
+  }, [])
 
   const handleLogin = async (params, errorCallback) => {
     try {

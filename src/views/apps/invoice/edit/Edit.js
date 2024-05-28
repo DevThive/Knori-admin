@@ -37,7 +37,7 @@ const InvoiceEdit = ({ id }) => {
     if (Object.keys(editedData).length === 0) {
       alert('변경된 내용이 없습니다.')
     } else {
-      console.log(editedData)
+      // console.log(editedData)
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
       axios

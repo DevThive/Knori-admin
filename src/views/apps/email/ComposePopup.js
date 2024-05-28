@@ -199,7 +199,7 @@ const ComposePopup = props => {
         }}
       >
         <Typography variant='h5' sx={{ fontWeight: 500 }}>
-          Compose Mail
+          새 메일
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton sx={{ p: 1, mr: 2 }} onClick={handleMinimize}>
@@ -219,13 +219,13 @@ const ComposePopup = props => {
           borderBottom: theme => `1px solid ${theme.palette.divider}`
         }}
       >
-        <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ width: '90%', display: 'flex', alignItems: 'center' }}>
           <div>
             <InputLabel
               htmlFor='email-to-select'
               sx={{ mr: 3, fontSize: theme => theme.typography.body2.fontSize, lineHeight: 1.539 }}
             >
-              To:
+              받는사람:
             </InputLabel>
           </div>
           <CustomAutocomplete
@@ -263,13 +263,13 @@ const ComposePopup = props => {
         </Box>
         <Typography variant='body2' sx={{ color: 'primary.main' }}>
           <Box component='span' sx={{ cursor: 'pointer' }} onClick={() => toggleVisibility('cc')}>
-            Cc
+            참조
           </Box>
           <Box component='span' sx={{ mx: 1 }}>
             |
           </Box>
           <Box component='span' sx={{ cursor: 'pointer' }} onClick={() => toggleVisibility('bcc')}>
-            Bcc
+            비참조
           </Box>
         </Typography>
       </Box>
@@ -284,7 +284,7 @@ const ComposePopup = props => {
         >
           <div>
             <InputLabel sx={{ mr: 3, fontSize: theme => theme.typography.body2.fontSize }} htmlFor='email-cc-select'>
-              Cc:
+              참조:
             </InputLabel>
           </div>
           <CustomTextField
@@ -306,7 +306,7 @@ const ComposePopup = props => {
         >
           <div>
             <InputLabel sx={{ mr: 3, fontSize: theme => theme.typography.body2.fontSize }} htmlFor='email-bcc-select'>
-              Bcc:
+              비참조:
             </InputLabel>
           </div>
           <CustomTextField
@@ -330,7 +330,7 @@ const ComposePopup = props => {
             htmlFor='email-subject-input'
             sx={{ mr: 3, fontSize: theme => theme.typography.body2.fontSize, lineHeight: 1.539 }}
           >
-            Subject:
+            제목:
           </InputLabel>
         </div>
         <Input
@@ -381,7 +381,7 @@ const ComposePopup = props => {
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Button variant='contained' onClick={handlePopupClose} sx={{ '& svg': { mr: 2 } }}>
             <Icon icon='tabler:send' fontSize='1.125rem' />
-            Send
+            전송
           </Button>
           <IconButton size='small' sx={{ ml: 3, color: 'text.secondary' }}>
             <Icon icon='tabler:paperclip' fontSize='1.25rem' />

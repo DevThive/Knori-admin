@@ -90,6 +90,7 @@ const MailLog = props => {
 
   // ** State
   const [refresh, setRefresh] = useState(false)
+  console.log(props.store)
 
   // ** Vars
   const folders = [
@@ -372,6 +373,7 @@ const MailLog = props => {
             {store && store.mails && store.mails.length ? (
               <List sx={{ p: 0 }}>
                 {store.mails.map(mail => {
+                  // console.log(mail)
                   const mailReadToggleIcon = mail.isRead ? 'tabler:mail' : 'tabler:mail-opened'
 
                   return (
@@ -484,10 +486,13 @@ const MailLog = props => {
                           variant='body2'
                           sx={{ minWidth: '50px', textAlign: 'right', whiteSpace: 'nowrap', color: 'text.disabled' }}
                         >
-                          {new Date(mail.time).toLocaleTimeString('en-US', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true
+                          {new Date(mail.time).toLocaleString('ko-KR', {
+                            year: 'numeric', // 년도
+                            month: '2-digit', // 월
+                            day: '2-digit', // 일
+                            hour: '2-digit', // 시
+                            minute: '2-digit', // 분
+                            hour12: true // 12시간제 사용 여부
                           })}
                         </Typography>
                       </Box>

@@ -18,7 +18,8 @@ function ClassToggle({ id }) {
           }
         })
         setClassPrivate(response.data.state === 1)
-        console.log('test')
+
+        // console.log('test')
       } catch (error) {
         console.error('비공개 상태 로딩 중 에러 발생:', error)
       }

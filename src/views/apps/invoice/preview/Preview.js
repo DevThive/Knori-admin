@@ -18,7 +18,7 @@ import AddPaymentDrawer from 'src/views/apps/invoice/shared-drawer/AddPaymentDra
 import SendInvoiceDrawer from 'src/views/apps/invoice/shared-drawer/SendInvoiceDrawer'
 
 const InvoicePreview = ({ id }) => {
-  console.log(id)
+  // console.log(id)
 
   // ** State
   const [error, setError] = useState(false)

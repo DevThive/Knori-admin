@@ -114,7 +114,7 @@ const SidebarLeft = props => {
     >
       <Box sx={{ p: 6, overflowY: 'hidden' }}>
         <Button fullWidth variant='contained' onClick={toggleComposeOpen}>
-          Compose
+          메일 전송
         </Button>
       </Box>
       <ScrollWrapper>
@@ -130,7 +130,7 @@ const SidebarLeft = props => {
                 <Icon icon='tabler:mail' />
               </ListItemIcon>
               <ListItemText
-                primary='Inbox'
+                primary='받은편지함'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(activeInboxCondition && { color: 'primary.main' }) }
@@ -155,7 +155,7 @@ const SidebarLeft = props => {
                 <Icon icon='tabler:send' />
               </ListItemIcon>
               <ListItemText
-                primary='Sent'
+                primary='보낸편지함'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('folder', 'sent') && { color: 'primary.main' }) }
@@ -179,7 +179,7 @@ const SidebarLeft = props => {
                 <Icon icon='tabler:file' />
               </ListItemIcon>
               <ListItemText
-                primary='Draft'
+                primary='임시보관함'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('folder', 'draft') && { color: 'primary.main' }) }
@@ -204,7 +204,7 @@ const SidebarLeft = props => {
                 <Icon icon='tabler:star' />
               </ListItemIcon>
               <ListItemText
-                primary='Starred'
+                primary='별표보관함'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('folder', 'starred') && { color: 'primary.main' }) }
@@ -228,7 +228,7 @@ const SidebarLeft = props => {
                 <Icon icon='tabler:info-circle' />
               </ListItemIcon>
               <ListItemText
-                primary='Spam'
+                primary='스팸함'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('folder', 'spam') && { color: 'primary.main' }) }
@@ -253,7 +253,7 @@ const SidebarLeft = props => {
                 <Icon icon='tabler:trash' />
               </ListItemIcon>
               <ListItemText
-                primary='Trash'
+                primary='휴지통'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('folder', 'trash') && { color: 'primary.main' }) }
@@ -281,7 +281,7 @@ const SidebarLeft = props => {
                 <Icon icon='mdi:circle' fontSize='0.625rem' />
               </ListItemIcon>
               <ListItemText
-                primary='Personal'
+                primary='개인'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('label', 'personal') && { color: 'primary.main' }) }
@@ -301,7 +301,7 @@ const SidebarLeft = props => {
                 <Icon icon='mdi:circle' fontSize='0.625rem' />
               </ListItemIcon>
               <ListItemText
-                primary='Company'
+                primary='업무/문의'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('label', 'company') && { color: 'primary.main' }) }
@@ -321,7 +321,7 @@ const SidebarLeft = props => {
                 <Icon icon='mdi:circle' fontSize='0.625rem' />
               </ListItemIcon>
               <ListItemText
-                primary='Important'
+                primary='중요'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('label', 'important') && { color: 'primary.main' }) }
@@ -341,7 +341,7 @@ const SidebarLeft = props => {
                 <Icon icon='mdi:circle' fontSize='0.625rem' />
               </ListItemIcon>
               <ListItemText
-                primary='Private'
+                primary='업무용'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('label', 'private') && { color: 'primary.main' }) }

@@ -4,24 +4,195 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 // ** Axios Imports
 import axios from 'axios'
 
-// ** Fetch Mails
-export const fetchMails = createAsyncThunk('appEmail/fetchMails', async params => {
-  const response = await axios.get('/apps/email/emails', {
-    params
-  })
+import authConfig from 'src/configs/auth'
+import MailDetails from 'src/views/apps/email/MailDetails'
 
-  return { ...response.data, filter: params }
+async function getGoogleApiToken() {
+  const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+  try {
+    const response = await axios.get('http://localhost:4001/gmail/token', {
+      headers: {
+        Authorization: `Bearer ${storedToken}`
+      }
+    })
+
+    return response.data // Google API로부터 받은 데이터 반환
+  } catch (error) {
+    console.error('Google API 토큰을 가져오는 데 실패했습니다.', error)
+    throw error // 에러 발생 시, 해당 에러를 호출한 곳으로 전파
+  }
+}
+
+// Base64 인코딩된 문자열을 디코딩하는 함수
+function decodeBase64(encodedString) {
+  // 서버 측에서 실행되는 경우
+  if (typeof window === 'undefined') {
+    return Buffer.from(encodedString.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString()
+  }
+
+  // 클라이언트 측에서 실행되는 경우
+  else {
+    return atob(encodedString.replace(/-/g, '+').replace(/_/g, '/'))
+  }
+}
+
+export const fetchMails = createAsyncThunk('appEmail/fetchMails', async params => {
+  try {
+    const googleApi = await getGoogleApiToken()
+
+    console.log(googleApi)
+
+    let searchQuery = params.q || ''
+    if (params.folder) {
+      searchQuery += ` in:${params.folder}`
+    }
+    if (params.label) {
+      searchQuery += ` label:${params.label}`
+    }
+
+    const mailListResponse = await axios.get(
+      `https://gmail.googleapis.com/gmail/v1/users/${googleApi.email}/messages?q=${encodeURIComponent(searchQuery)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${googleApi.accessToken}`
+        }
+      }
+    )
+
+    const mailsDetailsPromises = mailListResponse.data.messages.map(async message => {
+      try {
+        const messageDetailsResponse = await axios.get(
+          `https://gmail.googleapis.com/gmail/v1/users/${googleApi.email}/messages/${message.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${googleApi.accessToken}`
+            }
+          }
+        )
+
+        // console.log(messageDetailsResponse.data)
+
+        const headers = messageDetailsResponse.data.payload.headers
+        const subject = headers.find(header => header.name === 'Subject')?.value
+        const fromHeader = headers.find(header => header.name === 'From')?.value
+        const time = headers.find(header => header.name === 'Date')?.value
+
+        const from = {
+          email: fromHeader.match(/<(.+)>/)?.[1] || fromHeader,
+          name: fromHeader.split(' <')[0]
+
+          // avatar: '/images/avatars/default.png'
+        }
+
+        const to = [
+          {
+            name: messageDetailsResponse.data.payload.headers[0].name,
+            email: messageDetailsResponse.data.payload.headers[0].value
+          }
+        ]
+
+        return {
+          id: message.id,
+          from,
+          to,
+          subject,
+          cc: [],
+          bcc: [],
+          message: '<p>This is a placeholder for the actual message content.</p>',
+          attachments: [],
+          isStarred: false,
+          labels: messageDetailsResponse.data.labelIds,
+          time,
+          replies: [],
+          folder: 'inbox',
+          isRead: false
+        }
+      } catch (error) {
+        return rejectWithValue('Error fetching message details')
+      }
+    })
+
+    const mailsDetails = await Promise.all(mailsDetailsPromises)
+
+    // console.log(mailsDetails)
+
+    return { emails: mailsDetails, filter: params }
+  } catch (error) {
+    return rejectWithValue('Error fetching mails')
+  }
 })
 
 // ** Get Current Mail
 export const getCurrentMail = createAsyncThunk('appEmail/selectMail', async id => {
-  const response = await axios.get('/apps/email/get-email', {
-    params: {
-      id
-    }
-  })
+  try {
+    const googleApi = await getGoogleApiToken() // Google API 토큰을 가져옵니다.
+    // console.log(id)
 
-  return response.data
+    // googleApi 객체에서 바로 email과 accessToken을 사용합니다.
+    const messageDetailsResponse = await axios.get(
+      `https://gmail.googleapis.com/gmail/v1/users/${googleApi.email}/messages/${id}?format=full`,
+      {
+        headers: {
+          Authorization: `Bearer ${googleApi.accessToken}`
+        }
+      }
+    )
+
+    const messageDetailsResponseRaw = await axios.get(
+      `https://gmail.googleapis.com/gmail/v1/users/${googleApi.email}/messages/${id}?format=raw`,
+      {
+        headers: {
+          Authorization: `Bearer ${googleApi.accessToken}`
+        }
+      }
+    )
+
+    // console.log(messageDetailsResponse.data)
+
+    console.log(messageDetailsResponseRaw.data.raw)
+
+    const emailRawData = decodeBase64(messageDetailsResponseRaw.data.raw)
+
+    const headers = messageDetailsResponse.data.payload.headers
+    const subject = headers.find(header => header.name === 'Subject')?.value
+    const fromHeader = headers.find(header => header.name === 'From')?.value
+    const time = headers.find(header => header.name === 'Date')?.value
+
+    const from = {
+      email: fromHeader.match(/<(.+)>/)?.[1] || fromHeader,
+      name: fromHeader.split(' <')[0]
+
+      // avatar: '/images/avatars/default.png'
+    }
+
+    const to = [
+      {
+        name: messageDetailsResponse.data.payload.headers[0].name,
+        email: messageDetailsResponse.data.payload.headers[0].value
+      }
+    ]
+
+    return {
+      id: messageDetailsResponse.id,
+      from,
+      to,
+      subject,
+      cc: [],
+      bcc: [],
+      message: emailRawData,
+      attachments: [],
+      isStarred: false,
+      labels: messageDetailsResponse.data.labelIds,
+      time,
+      replies: [],
+      folder: 'inbox',
+      isRead: false
+    }
+  } catch (error) {
+    console.error('메일을 가져오는 데 실패했습니다.', error)
+    throw error // 에러 발생 시, 해당 에러를 호출한 곳으로 전파합니다.
+  }
 })
 
 // ** Update Mail

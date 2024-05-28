@@ -164,7 +164,7 @@ const columns = (updateData, handleEditClick) => [
           // 상태 변경 API 호출
           axios
             .patch(
-              `https://api.knori.or.kr/reservation/success/approve/${params.row.id}`,
+              `https://api.knori.or.kr/reservation/approve/${params.row.id}`,
               {
                 state: newState
               },
@@ -291,7 +291,7 @@ const TableColumns = () => {
     const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
     try {
       // Axios를 사용하여 API 요청을 보냄
-      const response = await axios.get('https://api.knori.or.kr/reservation/admin/success', {
+      const response = await axios.get('https://api.knori.or.kr/reservation/adminSuccess', {
         headers: {
           Authorization: `Bearer ${storedToken}`
         }
@@ -321,7 +321,7 @@ const TableColumns = () => {
 
     const filteredRows = data.filter(row => {
       return Object.keys(row).some(field => {
-        console.log(field)
+        // console.log(field)
 
         // @ts-ignore
         return searchRegex.test(row[field].toString())
@@ -349,7 +349,7 @@ const TableColumns = () => {
 
   // 예약 수정 버튼 클릭 이벤트
   const handleEditClick = params => {
-    console.log(params)
+    // console.log(params)
     openModal(params.row) // 선택된 예약 정보와 함께 모달 열기
   }
 
