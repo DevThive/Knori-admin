@@ -1123,6 +1123,8 @@ mock.onGet('/apps/email/get-email').reply(config => {
     mailIndex < paramsFilteredMails.length - 1 ? (mail.hasNextMail = true) : (mail.hasNextMail = false)
   }
 
+  console.log(mail)
+
   return mail ? [200, mail] : [404]
 })
 

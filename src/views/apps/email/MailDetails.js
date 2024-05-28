@@ -26,6 +26,8 @@ import Sidebar from 'src/@core/components/sidebar'
 import CustomChip from 'src/@core/components/mui/chip'
 import OptionsMenu from 'src/@core/components/option-menu'
 
+import DOMPurify from 'dompurify'
+
 const HiddenReplyBack = styled(Box)(({ theme }) => ({
   height: 11,
   width: '90%',
@@ -355,6 +357,8 @@ const MailDetails = props => {
 
                 {showReplies
                   ? mail.replies.map((reply, index) => {
+                      const sanitizedMessage = DOMPurify.sanitize(reply.message)
+
                       return (
                         <Box
                           key={index}
@@ -423,7 +427,10 @@ const MailDetails = props => {
                           </Box>
                           <Divider sx={{ m: '0 !important' }} />
                           <Box sx={{ px: 6 }}>
-                            <Box sx={{ color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: reply.message }} />
+                            <Box
+                              sx={{ color: 'text.secondary' }}
+                              dangerouslySetInnerHTML={{ __html: sanitizedMessage }}
+                            />
                           </Box>
                           {reply.attachments.length ? (
                             <>

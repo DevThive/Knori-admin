@@ -30,10 +30,10 @@ import {
 
 // ** Variables
 const labelColors = {
-  private: 'error',
-  personal: 'success',
-  company: 'primary',
-  important: 'warning'
+  PRIVATE: 'error',
+  INBOX: 'success',
+  COMPANY: 'primary',
+  IMPORTANT: 'warning'
 }
 
 const EmailAppLayout = ({ folder, label }) => {
@@ -60,12 +60,26 @@ const EmailAppLayout = ({ folder, label }) => {
 
   const routeParams = {
     label: label || '',
-    folder: folder || 'inbox'
+    folder: folder || 'INBOX'
   }
   useEffect(() => {
-    // @ts-ignore
-    dispatch(fetchMails({ q: query || '', folder: routeParams.folder, label: routeParams.label }))
+    const fetchEmailData = async () => {
+      try {
+        const mails = await dispatch(
+          fetchMails({ q: query || '', folder: routeParams.folder, label: routeParams.label })
+        ).unwrap()
+        console.log('Fetched mails:', mails) // fetchMails의 결과를 로그에 출력
+      } catch (error) {
+        console.error('Error fetching mails:', error)
+      }
+    }
+
+    fetchEmailData()
   }, [dispatch, query, routeParams.folder, routeParams.label])
+
+  useEffect(() => {
+    console.log('Store updated:', store) // 상태가 업데이트된 후 store를 로그에 출력
+  }, [store])
   const toggleComposeOpen = () => setComposeOpen(!composeOpen)
   const handleLeftSidebarToggle = () => setLeftSidebarOpen(!leftSidebarOpen)
 
