@@ -314,7 +314,7 @@ const SidebarLeft = props => {
               onClick={handleListItemClick}
               sx={{
                 py: 0.75,
-                borderLeftColor: handleActiveItem('label', 'important') ? 'primary.main' : 'transparent'
+                borderLeftColor: handleActiveItem('label', 'import') ? 'primary.main' : 'transparent'
               }}
             >
               <ListItemIcon sx={{ mr: 2.5, '& svg': { color: 'warning.main' } }}>
@@ -324,7 +324,7 @@ const SidebarLeft = props => {
                 primary='중요'
                 primaryTypographyProps={{
                   noWrap: true,
-                  sx: { fontWeight: 500, ...(handleActiveItem('label', 'important') && { color: 'primary.main' }) }
+                  sx: { fontWeight: 500, ...(handleActiveItem('label', 'import') && { color: 'primary.main' }) }
                 }}
               />
             </ListItemStyled>

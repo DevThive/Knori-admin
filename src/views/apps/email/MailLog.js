@@ -187,9 +187,10 @@ const MailLog = props => {
     dispatch(handleSelectAllMail(false))
   }
 
-  const handleLabelUpdate = (id, label) => {
+  // 라벨 업데이트 핸들러 함수
+  const handleLabelUpdate = (id, addLabels, removeLabels) => {
     const arr = Array.isArray(id) ? [...id] : [id]
-    dispatch(updateMailLabel({ emailIds: arr, label }))
+    dispatch(updateMailLabel({ emailIds: arr, addLabels, removeLabels }))
   }
 
   const handleFolderUpdate = (id, folder) => {
