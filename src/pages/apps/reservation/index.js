@@ -158,7 +158,8 @@ const columns = (updateData, handleEditClick) => [
         onChange={event => {
           const newState = event.target.value
           console.log(`상태 변경: ${newState}`)
-          console.log(params)
+
+          // console.log(params)
           const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
           // 상태 변경 API 호출
@@ -322,7 +323,7 @@ const TableColumns = () => {
 
     const filteredRows = data.filter(row => {
       return Object.keys(row).some(field => {
-        console.log(field)
+        // console.log(field)
 
         // @ts-ignore
         return searchRegex.test(row[field].toString())

@@ -58,15 +58,19 @@ const CrmRevenueGrowth = () => {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
       try {
-        const response = await axios.get(`http://localhost:4000/dashboard/completedreservation/week/${day}`, {
+        const response = await axios.get(`https://api.knori.or.kr/dashboard/completedreservation/week/${day}`, {
           headers: {
             Authorization: `Bearer ${storedToken}`
           }
         })
 
         // 예시 응답 데이터: { weeklyBookings: [32, 52, ...], todayBookings: 120 }
-        setBookingData(response.data.revenue.weeklyBookings)
-        setTodayBookings(response.data.revenue.todayBookings)
+        const weeklyBookings = response.data.revenue.weeklyBookings
+        setBookingData(weeklyBookings)
+
+        // 주간 예약 건수의 합 계산 후 todayBookings 업데이트
+        const totalBookings = weeklyBookings.reduce((acc, current) => acc + current, 0)
+        setTodayBookings(totalBookings)
       } catch (error) {
         console.error('데이터를 가져오는 데 실패했습니다.', error)
       }
@@ -136,14 +140,58 @@ const CrmRevenueGrowth = () => {
           <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               {/* 주간 이동 버튼 */}
-              <div style={{ textAlign: 'right' }}>
-                <button onClick={goToPreviousWeek}>이전 주</button>
-                <button onClick={goToNextWeek}>다음 주</button>
-              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: '',
+                  marginBottom: '10%' // 여기를 수정했습니다.
+                }}
+              >
+                <button
+                  onClick={goToNextWeek}
+                  style={{
+                    backgroundColor: '#e0e0e0', // 배경색을 회색으로 변경
+                    color: 'black', // 텍스트 색상을 검은색으로 변경
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '6px 12px', // 패딩 조정
+                    marginRight: '8px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    '&:hover': {
+                      backgroundColor: '#bdbdbd' // 호버 시 색상 변경
+                    }
+                  }}
+                >
+                  {'<'}
+                </button>
+                <button
+                  onClick={goToPreviousWeek}
+                  style={{
+                    backgroundColor: '#e0e0e0', // 배경색을 회색으로 변경
+                    color: 'black', // 텍스트 색상을 검은색으로 변경
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '6px 12px', // 패딩 조정
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    '&:hover': {
+                      backgroundColor: '#bdbdbd' // 호버 시 색상 변경
+                    }
+                  }}
+                >
+                  {'>'}
+                </button>
+              </div>{' '}
               <Typography variant='h5' sx={{ mb: 2 }}>
                 주간 예약 현황
               </Typography>
-              <Typography variant='body2'>주간 보고서 ({currentWeekRange})</Typography>{' '}
+              <Typography variant='body2'>주간 보고서</Typography>
+              <Typography variant='body2'>{currentWeekRange}</Typography>
             </div>
             <div>
               <Typography variant='h3' sx={{ mb: 2 }}>
@@ -152,6 +200,7 @@ const CrmRevenueGrowth = () => {
               {/* 예약 증가율에 따른 동적 컴포넌트 필요 */}
             </div>
           </Box>
+
           <ReactApexcharts type='bar' width={160} height={170} series={series} options={options} />
         </Box>
       </CardContent>

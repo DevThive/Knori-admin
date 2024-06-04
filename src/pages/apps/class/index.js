@@ -18,18 +18,20 @@ import classDataDB from 'src/@real-db/app/classDB'
 import Button from '@mui/material/Button'
 import Modal from '@mui/material/Modal'
 import Box from '@mui/material/Box'
-import { Typography } from '@mui/material'
+import { Typography, TextField } from '@mui/material'
 import Classeditor from 'src/views/apps/class/classAdd'
 
 import Classeditor2 from 'src/views/apps/class/classUpdate'
 import ClassToggle from 'src/views/apps/class/classesSelector'
 import ScheduleModal from 'src/views/apps/class/schedule'
+import { minWidth } from '@mui/system'
 
 const columns = [
   { id: 'id', label: 'ID', minWidth: 80 },
   { id: 'title', label: '타이틀', minWidth: 200 },
-  { id: 'date', label: '작성 날짜', minWidth: 100 },
-  { id: 'etc', label: '', align: 'right', minWidth: 40 }
+  { id: 'date', label: '작성 날짜', minWidth: 150 },
+  { id: 'price', label: '가격', minWidth: 100 },
+  { id: 'etc', label: '', align: 'right', minWidth: 100 }
 ]
 function createData(name, owner, date) {
   return { owner, name, date }
@@ -40,6 +42,7 @@ const TableStickyHeader = () => {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [classes, setClasses] = useState([]) // 상태 추가
+  const [editMode, setEditMode] = useState({})
 
   // const [title, setTitle] = useState('') // 제목을 위한 상태
   // const [content, setContent] = useState('') // 에디터 내용을 위한 상태
@@ -47,6 +50,35 @@ const TableStickyHeader = () => {
 
   // 모달 열림/닫힘 상태를 관리하는 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const savePrice = async (id, newPrice) => {
+    const classId = id // classId를 id로 설정
+    const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+    try {
+      // API 요청 보내기
+      const response = await axios.put(
+        `https://api.knori.or.kr/class/price/${classId}`,
+        {
+          price: newPrice
+        },
+        { headers: { Authorization: `Bearer ${storedToken}` } }
+      )
+
+      // 응답 확인
+      if (response.status !== 200) {
+        throw new Error('가격 저장에 실패했습니다.')
+      }
+
+      console.log(`Saving new price for ${classId}: ${newPrice}`)
+
+      // 저장 후 수정 모드 종료
+      setEditMode({ ...editMode, [id]: false })
+    } catch (error) {
+      console.error('Error saving new price:', error)
+
+      // 에러 처리 로직 추가 (예: 사용자에게 알림)
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -232,36 +264,70 @@ const TableStickyHeader = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {classes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
-              return (
-                <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
-                  {columns.map(column => {
-                    if (column.id === 'etc') {
-                      return (
-                        <TableCell key={column.id} align={column.align}>
-                          <ClassToggle id={row.id} />
-                          <Button variant='contained' color='primary' onClick={() => handleOpenScModal(row.id)}>
-                            시간관리
-                          </Button>{' '}
-                          <Button variant='contained' color='primary' onClick={() => handleOpenEditModal(row)}>
-                            수정하기
-                          </Button>{' '}
-                          <Button variant='contained' color='error' onClick={() => handleOpenDeleteModal(row.id)}>
-                            삭제
-                          </Button>
-                        </TableCell>
-                      )
-                    } else {
-                      return (
-                        <TableCell key={column.id} align={column.align}>
-                          {column.id === 'date' ? new Date(row[column.id]).toLocaleDateString() : row[column.id]}
-                        </TableCell>
-                      )
-                    }
-                  })}
-                </TableRow>
-              )
-            })}
+            {classes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
+              <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
+                {columns.map(column => {
+                  if (column.id === 'etc') {
+                    return (
+                      <TableCell key={column.id} align={column.align}>
+                        <Button variant='contained' color='primary' onClick={() => handleOpenScModal(row.id)}>
+                          시간관리
+                        </Button>{' '}
+                        <Button variant='contained' color='primary' onClick={() => handleOpenEditModal(row)}>
+                          수정하기
+                        </Button>{' '}
+                        <Button variant='contained' color='error' onClick={() => handleOpenDeleteModal(row.id)}>
+                          삭제
+                        </Button>
+                      </TableCell>
+                    )
+                  } else if (column.id === 'price') {
+                    return (
+                      <TableCell key={column.id} align={column.align}>
+                        {editMode[row.id] ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <TextField
+                              defaultValue={row[column.id]}
+                              onChange={e => (row[column.id] = e.target.value)}
+                              type='number'
+                              size='small'
+                              variant='outlined'
+                              style={{ width: '100px' }}
+                            />
+                            <Button
+                              variant='contained'
+                              color='primary'
+                              onClick={() => savePrice(row.id, row[column.id])}
+                              style={{ padding: '5px 10px' }}
+                            >
+                              저장
+                            </Button>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {row[column.id]}
+                            <Button
+                              variant='contained'
+                              color='primary'
+                              onClick={() => setEditMode({ ...editMode, [row.id]: true })}
+                              style={{ padding: '5px 10px' }}
+                            >
+                              수정
+                            </Button>
+                          </div>
+                        )}
+                      </TableCell>
+                    )
+                  } else {
+                    return (
+                      <TableCell key={column.id} align={column.align}>
+                        {column.id === 'date' ? new Date(row[column.id]).toLocaleDateString() : row[column.id]}
+                      </TableCell>
+                    )
+                  }
+                })}
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

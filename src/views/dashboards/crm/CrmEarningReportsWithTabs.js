@@ -91,7 +91,7 @@ const CrmEarningReportsWithTabs = () => {
             }
           )
 
-          console.log(response.data)
+          // console.log(response.data)
 
           return response.data
         } catch (error) {
@@ -306,12 +306,13 @@ const CrmEarningReportsWithTabs = () => {
       <CardHeader
         title='매출 및 예약 보고서'
         subheader='Yearly Earnings Overview'
-        action={
-          <OptionsMenu
-            options={['Last Week', 'Last Month', 'Last Year']}
-            iconButtonProps={{ size: 'small', sx: { color: 'text.disabled' } }}
-          />
-        }
+
+        // action={
+        //   <OptionsMenu
+        //     options={['Last Week', 'Last Month', 'Last Year']}
+        //     iconButtonProps={{ size: 'small', sx: { color: 'text.disabled' } }}
+        //   />
+        // }
       />
       <CardContent sx={{ '& .MuiTabPanel-root': { p: 0 } }}>
         <TabContext value={value}>

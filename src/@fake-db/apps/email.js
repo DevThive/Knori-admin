@@ -37,7 +37,7 @@ const data = {
       ],
       isStarred: false,
       labels: ['private'],
-      time: 'Mon Dec 10 2018 07:46:00 GMT+0000 (GMT)',
+      time: '2024-05-17 14:10:46.097852',
       replies: [],
       folder: 'inbox',
       isRead: true
@@ -1122,6 +1122,8 @@ mock.onGet('/apps/email/get-email').reply(config => {
     mailIndex > 0 ? (mail.hasPreviousMail = true) : (mail.hasPreviousMail = false)
     mailIndex < paramsFilteredMails.length - 1 ? (mail.hasNextMail = true) : (mail.hasNextMail = false)
   }
+
+  console.log(mail)
 
   return mail ? [200, mail] : [404]
 })

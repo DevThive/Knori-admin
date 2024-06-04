@@ -19,7 +19,6 @@ const CrmSalesWithRadarChart = () => {
     { name: '방문', data: [] }
   ])
 
-  // options 상태와 이 상태를 업데이트하는 함수 추가
   const [options, setOptions] = useState({
     chart: {
       parentHeightOffset: 0,
@@ -113,15 +112,13 @@ const CrmSalesWithRadarChart = () => {
           }
         })
 
-        // API 응답 구조에 맞게 visitData도 변환해야 하지만, 예시 응답이 주어지지 않았으므로 예시로 처리합니다.
-        const visitData = visitResponse.data.map(item => item.reservationCount) // 이 부분은 실제 응답 구조에 맞게 수정해야 합니다.
+        const visitData = visitResponse.data.map(item => item.reservationCount)
 
         setSeries([
           { name: '예약', data: reservationData },
           { name: '방문', data: visitData }
         ])
 
-        // labels 직접 업데이트
         setOptions(prevOptions => ({ ...prevOptions, labels }))
       } catch (error) {
         console.error('An error occurred while fetching the data.', error)
@@ -131,17 +128,20 @@ const CrmSalesWithRadarChart = () => {
     fetchData()
   }, [theme])
 
+  // console.log(series)
+
   return (
     <Card>
       <CardHeader
         title='방문 & 예약'
         subheader='6개월 기준'
-        action={
-          <OptionsMenu
-            options={['Last Month', 'Last 6 months', 'Last Year']}
-            iconButtonProps={{ size: 'small', sx: { color: 'text.disabled' } }}
-          />
-        }
+
+        // action={
+        //   <OptionsMenu
+        //     options={['Last Month', 'Last 6 months', 'Last Year']}
+        //     iconButtonProps={{ size: 'small', sx: { color: 'text.disabled' } }}
+        //   />
+        // }
       />
       <CardContent>
         <ReactApexcharts type='radar' height={357} series={series} options={options} />

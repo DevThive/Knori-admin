@@ -4,7 +4,7 @@ import authConfig from 'src/configs/auth'
 async function fetchDataAndProcess() {
   const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
   try {
-    const response = await axios.get('https://api.knori.or.kr/class/admin', {
+    const response = await axios.get('https://api.knori.or.kr/update-contact', {
       headers: {
         Authorization: `Bearer ${storedToken}`
       }
@@ -14,10 +14,13 @@ async function fetchDataAndProcess() {
     const processedData = data.map(item => {
       return {
         id: item.id,
-        title: item.title,
-        price: item.price,
+        user_name: item.reservation.client_name,
+        user_phone: item.reservation.client_phonenumber,
+        user_email: item.reservation.client_email,
+        contact_answer: item.contact_answer,
+        agency: item.reservation.agency,
         content: item.content,
-        photo: item.photo,
+
         date: new Date(item.createdAt) // 날짜 데이터로 변환하여 저장
       }
     })

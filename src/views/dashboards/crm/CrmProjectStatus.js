@@ -5,6 +5,10 @@ import { useTheme } from '@mui/material/styles'
 import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
+import React, { useState, useEffect } from 'react' // useState를 import합니다.
+import Collapse from '@mui/material/Collapse' // Collapse 컴포넌트를 import합니다.
+import axios from 'axios'
+import authConfig from 'src/configs/auth'
 
 // ** Custom Components Import
 import Icon from 'src/@core/components/icon'
@@ -12,27 +16,53 @@ import OptionsMenu from 'src/@core/components/option-menu'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
 
-const series = [
-  { data: [2000, 2000, 4000, 4000, 3050, 3050, 2050, 2050, 3050, 3050, 4700, 4700, 2750, 2750, 5700, 5700] }
-]
-
-const data = [
-  {
-    title: 'Donates',
-    trend: 'negative',
-    amount: '$756.26',
-    trendDiff: 139.34
-  },
-  {
-    title: 'Podcasts',
-    trendDiff: 576.24,
-    amount: '$2,207.03'
-  }
-]
-
 const CrmProjectStatus = () => {
   // ** Hook
   const theme = useTheme()
+
+  // 차트 표시 상태를 관리하기 위한 state를 추가합니다.
+  const [isChartVisible, setIsChartVisible] = useState(true)
+  const [series, setSeries] = useState([{ data: [] }])
+  const year = new Date().getFullYear()
+
+  const fetchMonthlyCosts = async year => {
+    const months = Array.from({ length: 12 }, (_, i) => i + 1) // 1부터 12까지의 배열 생성
+    const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+    try {
+      // 모든 달의 데이터를 병렬로 가져오기
+      const responses = await Promise.all(
+        months.map(month =>
+          axios.get(`https://api.knori.or.kr/dashboard/monthly-cost/${year}/${month}`, {
+            headers: {
+              Authorization: `Bearer ${storedToken}`
+            }
+          })
+        )
+      )
+
+      // 각 응답에서 데이터를 추출하여 배열로 만들기
+      const seriesData = responses.map(response => response.data)
+
+      setSeries([{ data: seriesData }])
+    } catch (error) {
+      console.error('Error fetching monthly costs:', error)
+
+      // 에러 처리 로직 추가 (예: 사용자에게 알림)
+      throw error
+    }
+  }
+
+  useEffect(() => {
+    fetchMonthlyCosts(year)
+  }, [year])
+
+  // console.log(series)
+
+  // 차트 표시 상태를 토글하는 함수입니다.
+  const toggleChartVisibility = () => {
+    setIsChartVisible(!isChartVisible)
+  }
 
   const options = {
     chart: {
@@ -96,12 +126,12 @@ const CrmProjectStatus = () => {
   return (
     <Card>
       <CardHeader
-        title='Project Status'
+        title='연간 매출 현황'
+        subheader={`${new Date().getFullYear()}`}
         action={
-          <OptionsMenu
-            options={['Share', 'Refresh', 'Update']}
-            iconButtonProps={{ size: 'small', sx: { color: 'text.disabled' } }}
-          />
+          <Typography sx={{ cursor: 'pointer', color: 'text.secondary' }} onClick={toggleChartVisibility}>
+            {isChartVisible ? '숨기기' : '보기'}
+          </Typography>
         }
       />
       <CardContent sx={{ pb: 0 }}>
@@ -121,16 +151,16 @@ const CrmProjectStatus = () => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Typography variant='h6'>$4,3742</Typography>
-              <Typography variant='body2' sx={{ color: 'text.disabled' }}>
-                Your Earnings
-              </Typography>
+              <Typography variant='h6'>매출 현황</Typography>
+              <Typography variant='body2' sx={{ color: 'text.disabled' }}></Typography>
             </Box>
-            <Typography sx={{ fontWeight: 500, color: 'success.main' }}>+10.2%</Typography>
+            {/* <Typography sx={{ fontWeight: 500, color: 'success.main' }}>+10.2%</Typography> */}
           </Box>
         </Box>
-        <ReactApexcharts type='area' height={254} series={series} options={options} />
-        {data.map((item, index) => (
+        <Collapse in={isChartVisible}>
+          <ReactApexcharts type='area' height={254} series={series} options={options} />
+        </Collapse>
+        {/* {data.map((item, index) => (
           <Box
             key={index}
             sx={{
@@ -151,7 +181,7 @@ const CrmProjectStatus = () => {
               </Typography>
             </Box>
           </Box>
-        ))}
+        ))} */}
       </CardContent>
     </Card>
   )

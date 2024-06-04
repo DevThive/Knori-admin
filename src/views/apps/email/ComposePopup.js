@@ -23,6 +23,7 @@ import Icon from 'src/@core/components/icon'
 
 // ** Third Party Components
 import { EditorState } from 'draft-js'
+import { convertToRaw } from 'draft-js'
 
 // ** Custom Components Imports
 import OptionsMenu from 'src/@core/components/option-menu'
@@ -107,6 +108,10 @@ const ComposePopup = props => {
       cc: false,
       bcc: false
     })
+  }
+
+  const handleSendMail = () => {
+    console.log(emailTo, ccValue, bccValue, subjectValue, messageValue)
   }
 
   const handleMinimize = () => {
@@ -199,7 +204,7 @@ const ComposePopup = props => {
         }}
       >
         <Typography variant='h5' sx={{ fontWeight: 500 }}>
-          Compose Mail
+          새 메일
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton sx={{ p: 1, mr: 2 }} onClick={handleMinimize}>
@@ -219,13 +224,13 @@ const ComposePopup = props => {
           borderBottom: theme => `1px solid ${theme.palette.divider}`
         }}
       >
-        <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ width: '90%', display: 'flex', alignItems: 'center' }}>
           <div>
             <InputLabel
               htmlFor='email-to-select'
               sx={{ mr: 3, fontSize: theme => theme.typography.body2.fontSize, lineHeight: 1.539 }}
             >
-              To:
+              받는사람:
             </InputLabel>
           </div>
           <CustomAutocomplete
@@ -263,13 +268,13 @@ const ComposePopup = props => {
         </Box>
         <Typography variant='body2' sx={{ color: 'primary.main' }}>
           <Box component='span' sx={{ cursor: 'pointer' }} onClick={() => toggleVisibility('cc')}>
-            Cc
+            참조
           </Box>
           <Box component='span' sx={{ mx: 1 }}>
             |
           </Box>
           <Box component='span' sx={{ cursor: 'pointer' }} onClick={() => toggleVisibility('bcc')}>
-            Bcc
+            비참조
           </Box>
         </Typography>
       </Box>
@@ -284,13 +289,16 @@ const ComposePopup = props => {
         >
           <div>
             <InputLabel sx={{ mr: 3, fontSize: theme => theme.typography.body2.fontSize }} htmlFor='email-cc-select'>
-              Cc:
+              참조:
             </InputLabel>
           </div>
           <CustomTextField
             fullWidth
             sx={{
               '& .MuiFilledInput-root.MuiInputBase-sizeSmall': { border: '0 !important', p: '0 !important' }
+            }}
+            onChange={event => {
+              setccValue(event.target.value) // 입력된 값을 setccValue 함수에 전달
             }}
           />
         </Box>
@@ -306,13 +314,16 @@ const ComposePopup = props => {
         >
           <div>
             <InputLabel sx={{ mr: 3, fontSize: theme => theme.typography.body2.fontSize }} htmlFor='email-bcc-select'>
-              Bcc:
+              비참조:
             </InputLabel>
           </div>
           <CustomTextField
             fullWidth
             sx={{
               '& .MuiFilledInput-root.MuiInputBase-sizeSmall': { border: '0 !important', p: '0 !important' }
+            }}
+            onChange={event => {
+              setbccValue(event.target.value) // 입력된 값을 setccValue 함수에 전달
             }}
           />
         </Box>
@@ -330,7 +341,7 @@ const ComposePopup = props => {
             htmlFor='email-subject-input'
             sx={{ mr: 3, fontSize: theme => theme.typography.body2.fontSize, lineHeight: 1.539 }}
           >
-            Subject:
+            제목:
           </InputLabel>
         </div>
         <Input
@@ -349,7 +360,14 @@ const ComposePopup = props => {
       >
         <ReactDraftWysiwyg
           editorState={messageValue}
-          onEditorStateChange={editorState => setMessageValue(editorState)}
+          onEditorStateChange={editorState => {
+            const currentContent = editorState.getCurrentContent() // 현재 에디터의 컨텐츠를 가져옵니다.
+            const rawContentState = convertToRaw(currentContent) // 컨텐츠를 원시 JS 객체로 변환합니다.
+            const textString = rawContentState.blocks.map(block => block.text).join('\n') // 각 블록의 텍스트를 \n으로 연결하여 전체 텍스트를 만듭니다.
+            console.log(textString) // 콘솔에 전체 텍스트를 출력합니다.
+
+            setMessageValue(textString) // setState 함수로 상태를 업데이트합니다.
+          }}
           placeholder='Write your message...'
           toolbar={{
             options: ['inline', 'list', 'link', 'image'],
@@ -379,9 +397,9 @@ const ComposePopup = props => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Button variant='contained' onClick={handlePopupClose} sx={{ '& svg': { mr: 2 } }}>
+          <Button variant='contained' onClick={handleSendMail} sx={{ '& svg': { mr: 2 } }}>
             <Icon icon='tabler:send' fontSize='1.125rem' />
-            Send
+            전송
           </Button>
           <IconButton size='small' sx={{ ml: 3, color: 'text.secondary' }}>
             <Icon icon='tabler:paperclip' fontSize='1.25rem' />

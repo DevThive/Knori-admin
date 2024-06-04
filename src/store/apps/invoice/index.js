@@ -14,7 +14,8 @@ export const fetchData = createAsyncThunk('appInvoice/fetchData', async params =
       },
       params: params
     })
-    console.log(response)
+
+    // console.log(response)
 
     return response.data
   } catch (error) {

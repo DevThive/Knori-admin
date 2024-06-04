@@ -25,6 +25,10 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 import Sidebar from 'src/@core/components/sidebar'
 import CustomChip from 'src/@core/components/mui/chip'
 import OptionsMenu from 'src/@core/components/option-menu'
+import quotedPrintable from 'quoted-printable'
+import utf8 from 'utf8'
+import iconv from 'iconv-lite'
+import DOMPurify from 'dompurify'
 
 const HiddenReplyBack = styled(Box)(({ theme }) => ({
   height: 11,
@@ -80,6 +84,7 @@ const MailDetails = props => {
 
   // ** State
   const [showReplies, setShowReplies] = useState(false)
+  const [message, setMessage] = useState('')
 
   // ** Hook
   const { settings } = useSettings()
@@ -173,6 +178,76 @@ const MailDetails = props => {
       return <Box sx={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>{children}</Box>
     } else {
       return <PerfectScrollbar options={{ wheelPropagation: false }}>{children}</PerfectScrollbar>
+    }
+  }
+
+  const formatDate = date => {
+    const d = new Date(date)
+    let month = '' + (d.getMonth() + 1) // 월은 0부터 시작하므로 1을 더해줍니다.
+    let day = '' + d.getDate()
+    const year = d.getFullYear()
+
+    // 한 자리 수 월과 일에는 앞에 0을 붙여줍니다.
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+
+    return [year, month, day].join('-')
+  }
+
+  // const decodeEmailRawData = rawData => {
+  //   try {
+  //     if (!rawData) {
+  //       throw new Error('데이터가 비어 있습니다.')
+  //     }
+
+  //     // rawData를 base64에서 utf-8 문자열로 디코딩
+  //     const decodedData = Buffer.from(rawData, 'base64').toString('utf-8')
+
+  //     if (!decodedData) {
+  //       throw new Error('디코딩된 데이터가 비어 있습니다.')
+  //     }
+  //     console.log(decodedData)
+
+  //     return decodedData
+  //   } catch (error) {
+  //     console.error('이메일 원시 데이터 디코딩 중 오류 발생:', error)
+
+  //     return null
+  //   }
+  // }
+
+  const decodeEmailRawData = rawData => {
+    try {
+      if (!rawData) {
+        throw new Error('데이터가 비어 있습니다.')
+      }
+
+      // Base64에서 버퍼로 디코딩
+      const base64DecodedData = Buffer.from(rawData, 'base64')
+
+      // quoted-printable에서 바이너리 문자열로 디코딩
+      const decodedData = quotedPrintable.decode(base64DecodedData.toString('binary'))
+
+      // iconv를 사용하여 UTF-8로 디코딩
+      const utf8Data = iconv.decode(Buffer.from(decodedData, 'binary'), 'utf-8')
+
+      if (!utf8Data) {
+        throw new Error('디코딩된 데이터가 비어 있습니다.')
+      }
+
+      // console.log(utf8Data)
+
+      // 디코딩된 데이터에서 HTML 내용만 추출
+      const htmlContentMatch = utf8Data.match(/<html[^>]*>([\s\S]*?)<\/html>/i)
+      if (htmlContentMatch && htmlContentMatch[0]) {
+        return htmlContentMatch[0] // HTML 내용 리턴
+      } else {
+        throw new Error('HTML 내용을 찾을 수 없습니다.')
+      }
+    } catch (error) {
+      console.error('HTML 내용 추출 중 오류 발생:', error)
+
+      return null
     }
   }
 
@@ -342,6 +417,33 @@ const MailDetails = props => {
 
                 {showReplies
                   ? mail.replies.map((reply, index) => {
+                      const decodeEmailRawData = rawData => {
+                        try {
+                          if (!rawData) {
+                            throw new Error('데이터가 비어 있습니다.')
+                          }
+
+                          // rawData를 quoted-printable에서 utf-8 문자열로 디코딩
+                          const decodedData = quotedPrintable.decode(rawData).toString('utf-8')
+                          if (!decodedData) {
+                            throw new Error('디코딩된 데이터가 비어 있습니다.')
+                          }
+                          console.log(decodedData)
+
+                          // // 디코딩된 데이터에서 HTML 내용만 추출
+                          // const htmlContentMatch = decodedData.match(/<html[^>]*>([\s\S]*?)<\/html>/i)
+                          // if (htmlContentMatch && htmlContentMatch[0]) {
+                          //   return htmlContentMatch[0] // HTML 내용 리턴
+                          // } else {
+                          //   throw new Error('HTML 내용을 찾을 수 없습니다.')
+                          // }
+                        } catch (error) {
+                          console.error('HTML 내용 추출 중 오류 발생:', error)
+
+                          return null
+                        }
+                      }
+
                       return (
                         <Box
                           key={index}
@@ -385,7 +487,7 @@ const MailDetails = props => {
                                     hour12: true
                                   })}
                                 </Typography>
-                                {mail.attachments.length ? (
+                                {reply.attachments.length ? (
                                   <IconButton size='small'>
                                     <Icon icon='tabler:paperclip' fontSize={20} />
                                   </IconButton>
@@ -410,7 +512,10 @@ const MailDetails = props => {
                           </Box>
                           <Divider sx={{ m: '0 !important' }} />
                           <Box sx={{ px: 6 }}>
-                            <Box sx={{ color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: reply.message }} />
+                            <Box
+                              sx={{ color: 'text.secondary' }}
+                              dangerouslySetInnerHTML={{ __html: decodeEmailRawData(reply.message) }}
+                            />
                           </Box>
                           {reply.attachments.length ? (
                             <>
@@ -473,8 +578,8 @@ const MailDetails = props => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Typography variant='body2' sx={{ mr: 3, color: 'text.disabled' }}>
-                          {new Date(mail.time).toDateString()}{' '}
-                          {new Date(mail.time).toLocaleTimeString('en-US', {
+                          {formatDate(mail.time)}{' '}
+                          {new Date(mail.time).toLocaleTimeString('ko-KR', {
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: true
@@ -506,7 +611,14 @@ const MailDetails = props => {
                   </Box>
                   <Divider sx={{ m: '0 !important' }} />
                   <Box sx={{ px: 6 }}>
-                    <Box sx={{ color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: mail.message }} />
+                    {mail && mail.message ? (
+                      <Box
+                        sx={{ color: 'text.secondary' }}
+                        dangerouslySetInnerHTML={{ __html: decodeEmailRawData(mail.message) }}
+                      />
+                    ) : (
+                      <div>Failed to retrieve message</div>
+                    )}
                   </Box>
                   {mail.attachments.length ? (
                     <>
