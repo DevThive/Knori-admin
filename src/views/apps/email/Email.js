@@ -31,7 +31,7 @@ import {
 // ** Variables
 const labelColors = {
   PRIVATE: 'error',
-  INBOX: 'success',
+
   COMPANY: 'primary',
   IMPORTANT: 'warning'
 }
@@ -68,7 +68,8 @@ const EmailAppLayout = ({ folder, label }) => {
         const mails = await dispatch(
           fetchMails({ q: query || '', folder: routeParams.folder, label: routeParams.label })
         ).unwrap()
-        console.log('Fetched mails:', mails) // fetchMails의 결과를 로그에 출력
+
+        // console.log('Fetched mails:', mails) // fetchMails의 결과를 로그에 출력
       } catch (error) {
         console.error('Error fetching mails:', error)
       }

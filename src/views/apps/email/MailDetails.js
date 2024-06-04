@@ -25,7 +25,9 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 import Sidebar from 'src/@core/components/sidebar'
 import CustomChip from 'src/@core/components/mui/chip'
 import OptionsMenu from 'src/@core/components/option-menu'
-
+import quotedPrintable from 'quoted-printable'
+import utf8 from 'utf8'
+import iconv from 'iconv-lite'
 import DOMPurify from 'dompurify'
 
 const HiddenReplyBack = styled(Box)(({ theme }) => ({
@@ -192,60 +194,61 @@ const MailDetails = props => {
     return [year, month, day].join('-')
   }
 
-  function base64urlToBase64(input) {
-    // base64url을 base64 형태로 변환
-    let base64 = input.replace(/-/g, '+').replace(/_/g, '/')
+  // const decodeEmailRawData = rawData => {
+  //   try {
+  //     if (!rawData) {
+  //       throw new Error('데이터가 비어 있습니다.')
+  //     }
 
-    // 패딩 추가
-    const pad = base64.length % 4
-    if (pad) {
-      if (pad === 1) {
-        throw new Error('Invalid base64url string')
-      }
-      base64 += '='.repeat(4 - pad)
-    }
+  //     // rawData를 base64에서 utf-8 문자열로 디코딩
+  //     const decodedData = Buffer.from(rawData, 'base64').toString('utf-8')
 
-    return base64
-  }
+  //     if (!decodedData) {
+  //       throw new Error('디코딩된 데이터가 비어 있습니다.')
+  //     }
+  //     console.log(decodedData)
 
-  function base64Decode(base64) {
-    if (typeof window !== 'undefined' && typeof window.atob === 'function') {
-      // 브라우저 환경
-      return window.atob(base64)
-    } else if (typeof Buffer !== 'undefined') {
-      // Node.js 환경
-      return Buffer.from(base64, 'base64').toString('binary')
-    } else {
-      throw new Error('No suitable base64 decode method found')
-    }
-  }
+  //     return decodedData
+  //   } catch (error) {
+  //     console.error('이메일 원시 데이터 디코딩 중 오류 발생:', error)
 
-  function decodeBase64Url(base64url) {
-    const base64 = base64urlToBase64(base64)
-    const binaryString = base64Decode(base64)
+  //     return null
+  //   }
+  // }
 
-    return decodeURIComponent(
-      binaryString
-        .split('')
-        .map(function (c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-        })
-        .join('')
-    )
-  }
-
-  // console.log('test : ', mail)
-
-  if (mail && mail.message) {
+  const decodeEmailRawData = rawData => {
     try {
-      const decodedContent = decodeBase64Url(mail.message)
-      const sanitizedMessage = DOMPurify.sanitize(decodedContent)
-      setMessage(sanitizedMessage)
+      if (!rawData) {
+        throw new Error('데이터가 비어 있습니다.')
+      }
+
+      // Base64에서 버퍼로 디코딩
+      const base64DecodedData = Buffer.from(rawData, 'base64')
+
+      // quoted-printable에서 바이너리 문자열로 디코딩
+      const decodedData = quotedPrintable.decode(base64DecodedData.toString('binary'))
+
+      // iconv를 사용하여 UTF-8로 디코딩
+      const utf8Data = iconv.decode(Buffer.from(decodedData, 'binary'), 'utf-8')
+
+      if (!utf8Data) {
+        throw new Error('디코딩된 데이터가 비어 있습니다.')
+      }
+
+      // console.log(utf8Data)
+
+      // 디코딩된 데이터에서 HTML 내용만 추출
+      const htmlContentMatch = utf8Data.match(/<html[^>]*>([\s\S]*?)<\/html>/i)
+      if (htmlContentMatch && htmlContentMatch[0]) {
+        return htmlContentMatch[0] // HTML 내용 리턴
+      } else {
+        throw new Error('HTML 내용을 찾을 수 없습니다.')
+      }
     } catch (error) {
-      console.error('디코딩 실패: ', error.message)
+      console.error('HTML 내용 추출 중 오류 발생:', error)
+
+      return null
     }
-  } else {
-    console.log('불러오기 실패')
   }
 
   return (
@@ -414,9 +417,32 @@ const MailDetails = props => {
 
                 {showReplies
                   ? mail.replies.map((reply, index) => {
-                      console.log(reply.message)
-                      const decodedContent = decodeBase64Url(reply.message)
-                      const sanitizedMessage = DOMPurify.sanitize(decodedContent) // DOMPurify 추가
+                      const decodeEmailRawData = rawData => {
+                        try {
+                          if (!rawData) {
+                            throw new Error('데이터가 비어 있습니다.')
+                          }
+
+                          // rawData를 quoted-printable에서 utf-8 문자열로 디코딩
+                          const decodedData = quotedPrintable.decode(rawData).toString('utf-8')
+                          if (!decodedData) {
+                            throw new Error('디코딩된 데이터가 비어 있습니다.')
+                          }
+                          console.log(decodedData)
+
+                          // // 디코딩된 데이터에서 HTML 내용만 추출
+                          // const htmlContentMatch = decodedData.match(/<html[^>]*>([\s\S]*?)<\/html>/i)
+                          // if (htmlContentMatch && htmlContentMatch[0]) {
+                          //   return htmlContentMatch[0] // HTML 내용 리턴
+                          // } else {
+                          //   throw new Error('HTML 내용을 찾을 수 없습니다.')
+                          // }
+                        } catch (error) {
+                          console.error('HTML 내용 추출 중 오류 발생:', error)
+
+                          return null
+                        }
+                      }
 
                       return (
                         <Box
@@ -488,7 +514,7 @@ const MailDetails = props => {
                           <Box sx={{ px: 6 }}>
                             <Box
                               sx={{ color: 'text.secondary' }}
-                              dangerouslySetInnerHTML={{ __html: sanitizedMessage }}
+                              dangerouslySetInnerHTML={{ __html: decodeEmailRawData(reply.message) }}
                             />
                           </Box>
                           {reply.attachments.length ? (
@@ -586,7 +612,10 @@ const MailDetails = props => {
                   <Divider sx={{ m: '0 !important' }} />
                   <Box sx={{ px: 6 }}>
                     {mail && mail.message ? (
-                      <Box sx={{ color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: message }} />
+                      <Box
+                        sx={{ color: 'text.secondary' }}
+                        dangerouslySetInnerHTML={{ __html: decodeEmailRawData(mail.message) }}
+                      />
                     ) : (
                       <div>Failed to retrieve message</div>
                     )}
