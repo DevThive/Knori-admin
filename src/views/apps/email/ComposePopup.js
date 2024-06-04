@@ -23,6 +23,7 @@ import Icon from 'src/@core/components/icon'
 
 // ** Third Party Components
 import { EditorState } from 'draft-js'
+import { convertToRaw } from 'draft-js'
 
 // ** Custom Components Imports
 import OptionsMenu from 'src/@core/components/option-menu'
@@ -107,6 +108,10 @@ const ComposePopup = props => {
       cc: false,
       bcc: false
     })
+  }
+
+  const handleSendMail = () => {
+    console.log(emailTo, ccValue, bccValue, subjectValue, messageValue)
   }
 
   const handleMinimize = () => {
@@ -292,6 +297,9 @@ const ComposePopup = props => {
             sx={{
               '& .MuiFilledInput-root.MuiInputBase-sizeSmall': { border: '0 !important', p: '0 !important' }
             }}
+            onChange={event => {
+              setccValue(event.target.value) // 입력된 값을 setccValue 함수에 전달
+            }}
           />
         </Box>
       ) : null}
@@ -313,6 +321,9 @@ const ComposePopup = props => {
             fullWidth
             sx={{
               '& .MuiFilledInput-root.MuiInputBase-sizeSmall': { border: '0 !important', p: '0 !important' }
+            }}
+            onChange={event => {
+              setbccValue(event.target.value) // 입력된 값을 setccValue 함수에 전달
             }}
           />
         </Box>
@@ -349,7 +360,14 @@ const ComposePopup = props => {
       >
         <ReactDraftWysiwyg
           editorState={messageValue}
-          onEditorStateChange={editorState => setMessageValue(editorState)}
+          onEditorStateChange={editorState => {
+            const currentContent = editorState.getCurrentContent() // 현재 에디터의 컨텐츠를 가져옵니다.
+            const rawContentState = convertToRaw(currentContent) // 컨텐츠를 원시 JS 객체로 변환합니다.
+            const textString = rawContentState.blocks.map(block => block.text).join('\n') // 각 블록의 텍스트를 \n으로 연결하여 전체 텍스트를 만듭니다.
+            console.log(textString) // 콘솔에 전체 텍스트를 출력합니다.
+
+            setMessageValue(textString) // setState 함수로 상태를 업데이트합니다.
+          }}
           placeholder='Write your message...'
           toolbar={{
             options: ['inline', 'list', 'link', 'image'],
@@ -379,7 +397,7 @@ const ComposePopup = props => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Button variant='contained' onClick={handlePopupClose} sx={{ '& svg': { mr: 2 } }}>
+          <Button variant='contained' onClick={handleSendMail} sx={{ '& svg': { mr: 2 } }}>
             <Icon icon='tabler:send' fontSize='1.125rem' />
             전송
           </Button>

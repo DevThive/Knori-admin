@@ -90,7 +90,8 @@ const MailLog = props => {
 
   // ** State
   const [refresh, setRefresh] = useState(false)
-  console.log(props.store)
+
+  // console.log(props.store)
 
   // ** Vars
   const folders = [
@@ -187,8 +188,8 @@ const MailLog = props => {
     dispatch(handleSelectAllMail(false))
   }
 
-  // 라벨 업데이트 핸들러 함수
   const handleLabelUpdate = (id, addLabels, removeLabels) => {
+    console.log('handleLabelUpdate 호출', id, addLabels, removeLabels)
     const arr = Array.isArray(id) ? [...id] : [id]
     dispatch(updateMailLabel({ emailIds: arr, addLabels, removeLabels }))
   }

@@ -11,7 +11,7 @@ import mimemessage from 'mimemessage'
 async function getGoogleApiToken() {
   const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
   try {
-    const response = await axios.get('http://localhost:4001/gmail/token', {
+    const response = await axios.get('https://api.knori.or.kr/gmail/token', {
       headers: {
         Authorization: `Bearer ${storedToken}`
       }
@@ -102,9 +102,11 @@ export const fetchMails = createAsyncThunk('appEmail/fetchMails', async (params,
 
         const isStarred = messageDetailsResponse.data.labelIds.includes('STARRED')
 
+        // console.log(messageDetailsResponse.data.labelIds)
+
         const labels = messageDetailsResponse.data.labelIds
           .map(labelId => labelsMap[labelId] || labelId)
-          .filter(label => ['PRIVATE', 'RESERVATION', 'COMPANY', 'IMPORT'].includes(label))
+          .filter(label => ['PRIVATE', 'COMPANY', 'IMPORTANT'].includes(label))
 
         return {
           id: message.id,
@@ -215,7 +217,7 @@ export const getCurrentMail = createAsyncThunk('appEmail/selectMail', async id =
 
     const labels = messageDetailsResponse.data.labelIds
       .map(labelId => labelsMap[labelId] || labelId)
-      .filter(label => ['PRIVATE', 'RESERVATION', 'COMPANY', 'IMPORT'].includes(label))
+      .filter(label => ['PRIVATE', 'COMPANY', 'IMPORTANT'].includes(label))
 
     return {
       id: messageDetailsResponse.id,
@@ -246,7 +248,7 @@ export const updateMail = createAsyncThunk('appEmail/updateMail', async (params,
     const googleApi = await getGoogleApiToken() // Google API 토큰을 가져옵니다.
     const userId = googleApi.email
 
-    console.log(emailIds, dataToUpdate)
+    // console.log(emailIds, dataToUpdate)
 
     // 요청에 사용될 공통 헤더 설정
     const config = {
@@ -310,58 +312,98 @@ export const updateMail = createAsyncThunk('appEmail/updateMail', async (params,
   }
 })
 
-// 사용자의 라벨 목록을 가져오는 함수
-
-const fetchLabels = async (userId, accessToken) => {
-  const config = { headers: { Authorization: `Bearer ${accessToken}` } }
-  const response = await axios.get(`https://gmail.googleapis.com/gmail/v1/users/${userId}/labels`, config)
+// ** Gmail 라벨을 가져오는 함수
+const getGmailLabels = async accessToken => {
+  const response = await axios.get('https://gmail.googleapis.com/gmail/v1/users/me/labels', {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    }
+  })
 
   return response.data.labels
 }
 
+// ** 이메일 라벨을 업데이트하는 Redux Async Thunk
 export const updateMailLabel = createAsyncThunk('appEmail/updateMailLabel', async (params, { dispatch, getState }) => {
-  const googleApi = await getGoogleApiToken() // Google API 토큰을 가져옵니다.
-  const userId = googleApi.email
+  // console.log('updateMailLabel 시작', params)
+
+  const googleApi = await getGoogleApiToken()
   const accessToken = googleApi.accessToken
-  const config = { headers: { Authorization: `Bearer ${accessToken}` } }
 
-  // 사용자의 라벨 목록을 가져옵니다.
-  const labels = await fetchLabels(userId, accessToken)
+  // console.log('accessToken 획득', accessToken)
 
-  // 라벨 이름을 라벨 ID로 변환합니다.
-  const labelMap = {}
-  labels.forEach(label => {
-    labelMap[label.name] = label.id
-  })
+  const updateEmailLabelsWithGmailAPI = async (emailId, addLabels, removeLabels) => {
+    try {
+      console.log(
+        `updateEmailLabelsWithGmailAPI 실행 - emailId: ${emailId}, addLabels: ${addLabels}, removeLabels: ${removeLabels}`
+      )
 
-  const addLabelIds = params.addLabels.map(labelName => labelMap[labelName]).filter(Boolean)
-  const removeLabelIds = params.removeLabels.map(labelName => labelMap[labelName]).filter(Boolean)
+      const response = await axios.post(
+        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${emailId}/modify`,
+        {
+          addLabelIds: addLabels,
+          removeLabelIds: removeLabels
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
 
-  const promises = params.emailIds.map(emailId => {
-    // Gmail API를 사용하여 메일의 라벨을 업데이트합니다.
-    return axios.post(
-      `https://gmail.googleapis.com/gmail/v1/users/${userId}/messages/${emailId}/modify`,
-      {
-        removeLabelIds: removeLabelIds || [], // 제거할 라벨 ID 목록
-        addLabelIds: addLabelIds || [] // 추가할 라벨 ID
-      },
-      config
-    )
-  })
+      // console.log(`라벨 업데이트 성공 - emailId: ${emailId}`, response.data)
 
-  console.log(promises)
-
-  await Promise.all(promises)
-
-  // 메일 목록 새로고침
-  await dispatch(fetchMails(getState().email.filter))
-  if (Array.isArray(params.emailIds) && params.emailIds.length > 0) {
-    await dispatch(getCurrentMail(params.emailIds[0]))
+      return response.data
+    } catch (error) {
+      console.error(`Error updating labels for message ID: ${emailId}`, error.response?.data || error.message)
+      throw error
+    }
   }
 
-  // 성공적으로 처리되었음을 알리는 응답을 반환합니다.
-  // 실제 응답 형태는 Gmail API의 응답에 따라 달라질 수 있습니다.
-  return { success: true }
+  const labels = await getGmailLabels(accessToken)
+
+  // console.log('라벨 목록 획득', labels)
+
+  const labelMap = labels.reduce((acc, label) => {
+    acc[label.name] = label.id
+
+    return acc
+  }, {})
+
+  // console.log('라벨 맵 생성', labelMap)
+
+  // console.log(params.addLabels)
+
+  // console.log('test')
+
+  const addLabelIds = Array.isArray(params.addLabels)
+    ? params.addLabels.map(label => labelMap[label]).filter(id => id !== undefined)
+    : params.addLabels
+    ? [labelMap[params.addLabels]].filter(id => id !== undefined)
+    : []
+
+  const removeLabelIds = Array.isArray(params.removeLabels)
+    ? params.removeLabels.map(label => labelMap[label]).filter(id => id !== undefined)
+    : params.removeLabels
+    ? [labelMap[params.removeLabels]].filter(id => id !== undefined)
+    : []
+  console.log('라벨 ID 매핑 - addLabelIds:', addLabelIds, 'removeLabelIds:', removeLabelIds)
+
+  const responses = await Promise.all(
+    params.emailIds.map(emailId => updateEmailLabelsWithGmailAPI(emailId, addLabelIds, removeLabelIds))
+  )
+
+  // console.log('모든 라벨 업데이트 요청 완료', responses)
+
+  // 예시로, fetchMails 및 getCurrentMail 액션의 구현은 생략되어 있음
+  // await dispatch(fetchMails(getState().email.filter))
+  // if (Array.isArray(params.emailIds) && params.emailIds.length > 0) {
+  //   await dispatch(getCurrentMail(params.emailIds[0]))
+  // }
+
+  return responses
 })
 
 // ** Prev/Next Mails

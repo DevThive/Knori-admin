@@ -270,6 +270,26 @@ const SidebarLeft = props => {
           <List component='div'>
             <ListItemStyled
               component={Link}
+              href='/apps/email/label/private'
+              onClick={handleListItemClick}
+              sx={{
+                py: 0.75,
+                borderLeftColor: handleActiveItem('label', 'private') ? 'primary.main' : 'transparent'
+              }}
+            >
+              <ListItemIcon sx={{ mr: 2.5, '& svg': { color: 'error.main' } }}>
+                <Icon icon='mdi:circle' fontSize='0.625rem' />
+              </ListItemIcon>
+              <ListItemText
+                primary='개인'
+                primaryTypographyProps={{
+                  noWrap: true,
+                  sx: { fontWeight: 500, ...(handleActiveItem('label', 'private') && { color: 'primary.main' }) }
+                }}
+              />
+            </ListItemStyled>
+            {/* <ListItemStyled
+              component={Link}
               href='/apps/email/label/personal'
               onClick={handleListItemClick}
               sx={{
@@ -277,17 +297,17 @@ const SidebarLeft = props => {
                 borderLeftColor: handleActiveItem('label', 'personal') ? 'primary.main' : 'transparent'
               }}
             >
-              <ListItemIcon sx={{ mr: 2.5, '& svg': { color: 'success.main' } }}>
+              <ListItemIcon sx={{ mr: 2.5, '& svg': { color: 'primary.main' } }}>
                 <Icon icon='mdi:circle' fontSize='0.625rem' />
               </ListItemIcon>
               <ListItemText
-                primary='개인'
+                primary='예약/상담'
                 primaryTypographyProps={{
                   noWrap: true,
-                  sx: { fontWeight: 500, ...(handleActiveItem('label', 'personal') && { color: 'primary.main' }) }
+                  sx: { fontWeight: 500, ...(handleActiveItem('label', 'reservation') && { color: 'primary.main' }) }
                 }}
               />
-            </ListItemStyled>
+            </ListItemStyled> */}
             <ListItemStyled
               component={Link}
               href='/apps/email/label/company'
@@ -301,7 +321,7 @@ const SidebarLeft = props => {
                 <Icon icon='mdi:circle' fontSize='0.625rem' />
               </ListItemIcon>
               <ListItemText
-                primary='업무/문의'
+                primary='회사 업무'
                 primaryTypographyProps={{
                   noWrap: true,
                   sx: { fontWeight: 500, ...(handleActiveItem('label', 'company') && { color: 'primary.main' }) }
@@ -314,7 +334,7 @@ const SidebarLeft = props => {
               onClick={handleListItemClick}
               sx={{
                 py: 0.75,
-                borderLeftColor: handleActiveItem('label', 'import') ? 'primary.main' : 'transparent'
+                borderLeftColor: handleActiveItem('label', 'important') ? 'primary.main' : 'transparent'
               }}
             >
               <ListItemIcon sx={{ mr: 2.5, '& svg': { color: 'warning.main' } }}>
@@ -324,27 +344,7 @@ const SidebarLeft = props => {
                 primary='중요'
                 primaryTypographyProps={{
                   noWrap: true,
-                  sx: { fontWeight: 500, ...(handleActiveItem('label', 'import') && { color: 'primary.main' }) }
-                }}
-              />
-            </ListItemStyled>
-            <ListItemStyled
-              component={Link}
-              href='/apps/email/label/private'
-              onClick={handleListItemClick}
-              sx={{
-                py: 0.75,
-                borderLeftColor: handleActiveItem('label', 'private') ? 'primary.main' : 'transparent'
-              }}
-            >
-              <ListItemIcon sx={{ mr: 2.5, '& svg': { color: 'error.main' } }}>
-                <Icon icon='mdi:circle' fontSize='0.625rem' />
-              </ListItemIcon>
-              <ListItemText
-                primary='업무용'
-                primaryTypographyProps={{
-                  noWrap: true,
-                  sx: { fontWeight: 500, ...(handleActiveItem('label', 'private') && { color: 'primary.main' }) }
+                  sx: { fontWeight: 500, ...(handleActiveItem('label', 'important') && { color: 'primary.main' }) }
                 }}
               />
             </ListItemStyled>

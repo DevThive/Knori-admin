@@ -31,9 +31,9 @@ import {
 // ** Variables
 const labelColors = {
   PRIVATE: 'error',
-  RESERVATION: 'success',
+
   COMPANY: 'primary',
-  IMPORT: 'warning'
+  IMPORTANT: 'warning'
 }
 
 const EmailAppLayout = ({ folder, label }) => {
