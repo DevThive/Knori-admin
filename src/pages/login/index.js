@@ -132,7 +132,7 @@ const LoginPage = () => {
     const height = 600
     const left = (window.innerWidth - width) / 2
     const top = (window.innerHeight - height) / 2
-    const googleAuthUrl = 'https://api.knori.or.kr/auth/google'
+    const googleAuthUrl = 'http://localhost:4001/auth/google'
 
     window.open(googleAuthUrl, 'Google Login', `width=${width},height=${height},top=${top},left=${left}`)
   }
