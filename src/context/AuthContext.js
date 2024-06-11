@@ -31,6 +31,46 @@ const AuthProvider = ({ children }) => {
 
   // ** Hooks
   const router = useRouter()
+
+  const refreshToken = async () => {
+    try {
+      const refreshToken = window.localStorage.getItem(authConfig.refreshTokenKeyName)
+      const response = await axios.post(authConfig.refreshTokenEndpoint, { refreshToken: refreshToken })
+      const { accessToken } = response.data
+      window.localStorage.setItem(authConfig.storageTokenKeyName, accessToken)
+
+      return accessToken
+    } catch (error) {
+      console.error(error)
+      setError('토큰 갱신에 실패했습니다.')
+      handleLogout()
+      throw error
+    }
+  }
+
+  const fetchUserData = async token => {
+    try {
+      const response = await axios.get(authConfig.meEndpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      setUser({ ...response.data })
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        // 토큰이 만료된 경우
+        const newToken = await refreshToken()
+
+        // 갱신된 토큰으로 다시 시도
+        await fetchUserData(newToken)
+      } else {
+        console.error(error)
+        setError('로그인 정보를 가져오는데 실패했습니다.')
+        handleLogout()
+      }
+    }
+  }
+
   useEffect(() => {
     const initAuth = async () => {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
@@ -39,30 +79,16 @@ const AuthProvider = ({ children }) => {
 
       if (token) {
         setLoading(true)
-        try {
-          const response = await axios.get(authConfig.meEndpoint, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          })
-          setUser({ ...response.data })
-        } catch (error) {
-          console.error(error)
-          setError('로그인 정보를 가져오는데 실패했습니다.')
-          handleLogout() // 실패 시 로그아웃 처리
-        }
+        await fetchUserData(token)
         setLoading(false)
       } else {
         setLoading(false)
       }
     }
     initAuth()
-
-    // 필요한 의존성을 배열에 추가
   }, [router])
 
   useEffect(() => {
-    // 메시지 리스너 등록
     const handleToken = async event => {
       if (event.data.token) {
         const token = event.data.token
@@ -74,7 +100,8 @@ const AuthProvider = ({ children }) => {
             }
           })
           setUser({ ...response.data })
-          window.localStorage.setItem(authConfig.storageTokenKeyName, token) // 옵셔널: 토큰 저장
+          window.localStorage.setItem(authConfig.storageTokenKeyName, token) // 액세스 토큰 저장
+          window.localStorage.setItem(authConfig.refreshTokenKeyName, response.data.currentRefreshToken) // 리프레쉬 토큰 저장
           window.localStorage.setItem('userData', JSON.stringify(response.data))
           window.location.href = '/'
         } catch (error) {
@@ -114,18 +141,18 @@ const AuthProvider = ({ children }) => {
     router.push('/login')
   }
 
-  // 토큰 갱신 로직 (가상 코드, 실제 구현 필요)
-  const refreshToken = async () => {
-    try {
-      const response = await axios.post(authConfig.refreshTokenEndpoint)
-      const { accessToken } = response.data
-      window.localStorage.setItem(authConfig.storageTokenKeyName, accessToken)
-    } catch (error) {
-      console.error(error)
-      setError('토큰 갱신에 실패했습니다.')
-      handleLogout()
-    }
-  }
+  // // 토큰 갱신 로직 (가상 코드, 실제 구현 필요)
+  // const refreshToken = async () => {
+  //   try {
+  //     const response = await axios.post(authConfig.refreshTokenEndpoint)
+  //     const { accessToken } = response.data
+  //     window.localStorage.setItem(authConfig.storageTokenKeyName, accessToken)
+  //   } catch (error) {
+  //     console.error(error)
+  //     setError('토큰 갱신에 실패했습니다.')
+  //     handleLogout()
+  //   }
+  // }
 
   const values = {
     user,
