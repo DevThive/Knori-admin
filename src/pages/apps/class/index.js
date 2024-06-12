@@ -355,10 +355,12 @@ const TableStickyHeader = () => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
+            maxHeight: '90vh', // 화면 높이의 90%로 최대 높이 설정
             width: 1000,
             bgcolor: 'background.paper',
             boxShadow: 24,
-            p: 4
+            p: 4,
+            overflow: 'auto' // 스크롤 가능하도록 설정
           }}
         >
           <Classeditor2 updateNotices={updateClass} closeModal={handleCancelEditModal} editData={Edits} />
