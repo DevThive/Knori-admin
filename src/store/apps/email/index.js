@@ -11,7 +11,7 @@ async function getGoogleApiToken() {
   const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
   try {
-    const response = await axios.get('http://localhost:4001/gmail/token', {
+    const response = await axios.get('https://api.knori.or.kr/gmail/token', {
       headers: {
         Authorization: `Bearer ${storedToken}`
       }
