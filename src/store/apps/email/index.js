@@ -6,7 +6,12 @@ import axios from 'axios'
 
 import authConfig from 'src/configs/auth'
 import MailDetails from 'src/views/apps/email/MailDetails'
+
 import mimemessage from 'mimemessage'
+
+// import nodemailer from 'nodemailer'
+
+// import { google } from 'googleapis'
 
 async function getGoogleApiToken() {
   const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)

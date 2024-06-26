@@ -23,7 +23,11 @@ import Icon from 'src/@core/components/icon'
 
 // ** Third Party Components
 import { EditorState } from 'draft-js'
+
 import { convertToRaw } from 'draft-js'
+import { stateToHTML } from 'draft-js-export-html'
+
+// import { nodemailer } from 'nodemailer'
 
 // ** Custom Components Imports
 import OptionsMenu from 'src/@core/components/option-menu'
@@ -82,7 +86,10 @@ const ComposePopup = props => {
   const [ccValue, setccValue] = useState([])
   const [subjectValue, setSubjectValue] = useState('')
   const [bccValue, setbccValue] = useState([])
-  const [messageValue, setMessageValue] = useState(EditorState.createEmpty())
+
+  const [editorState, setEditorState] = useState(() => EditorState.createEmpty())
+  const [editorHtml, setEditorHtml] = useState('')
+  const [editorText, setEditorText] = useState('')
 
   const [visibility, setVisibility] = useState({
     cc: false,
@@ -103,15 +110,33 @@ const ComposePopup = props => {
     setccValue([])
     setbccValue([])
     setSubjectValue('')
-    setMessageValue(EditorState.createEmpty())
+    setEditorState()
     setVisibility({
       cc: false,
       bcc: false
     })
   }
 
-  const handleSendMail = () => {
-    console.log(emailTo, ccValue, bccValue, subjectValue, messageValue)
+  const onEditorStateChange = newEditorState => {
+    const currentContent = newEditorState.getCurrentContent() // 현재 에디터의 컨텐츠를 가져옵니다.
+    const rawContentState = convertToRaw(currentContent) // 컨텐츠를 원시 JS 객체로 변환합니다.
+    const textString = rawContentState.blocks.map(block => block.text).join('\n') // 각 블록의 텍스트를 \n으로 연결하여 전체 텍스트를 만듭니다.
+    // console.log(textString) // 콘솔에 전체 텍스트를 출력합니다.
+
+    const htmlString = stateToHTML(currentContent) // 컨텐츠를 HTML 형식으로 변환합니다.
+    // console.log(htmlString) // HTML 형식의 텍스트를 콘솔에 출력합니다.
+
+    setEditorText(textString)
+    setEditorState(newEditorState) // setState 함수로 상태를 업데이트합니다.
+    setEditorHtml(htmlString) // HTML 형식의 텍스트를 상태로 업데이트합니다.
+  }
+
+  // const handleSendMail = () => {
+  //   console.log(emailTo, ccValue, bccValue, subjectValue, editorHtml)
+  // }
+
+  const handleSendMail = async () => {
+    console.log(emailTo, ccValue, bccValue, subjectValue, editorHtml)
   }
 
   const handleMinimize = () => {
@@ -120,7 +145,7 @@ const ComposePopup = props => {
     setccValue(ccValue)
     setbccValue(bccValue)
     setVisibility(visibility)
-    setMessageValue(messageValue)
+    setEditorState(editorState)
     setSubjectValue(subjectValue)
   }
 
@@ -359,15 +384,8 @@ const ComposePopup = props => {
         }}
       >
         <ReactDraftWysiwyg
-          editorState={messageValue}
-          onEditorStateChange={editorState => {
-            const currentContent = editorState.getCurrentContent() // 현재 에디터의 컨텐츠를 가져옵니다.
-            const rawContentState = convertToRaw(currentContent) // 컨텐츠를 원시 JS 객체로 변환합니다.
-            const textString = rawContentState.blocks.map(block => block.text).join('\n') // 각 블록의 텍스트를 \n으로 연결하여 전체 텍스트를 만듭니다.
-            console.log(textString) // 콘솔에 전체 텍스트를 출력합니다.
-
-            setMessageValue(textString) // setState 함수로 상태를 업데이트합니다.
-          }}
+          editorState={editorState}
+          onEditorStateChange={onEditorStateChange}
           placeholder='Write your message...'
           toolbar={{
             options: ['inline', 'list', 'link', 'image'],

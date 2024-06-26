@@ -16,6 +16,7 @@ async function fetchDataAndProcess() {
         id: item.id,
         title: item.title,
         price: item.price,
+        EtcPrice: item.etcprice,
         content: item.content,
         photo: item.photo,
         date: new Date(item.createdAt) // 날짜 데이터로 변환하여 저장

@@ -31,8 +31,10 @@ const columns = [
   { id: 'title', label: '타이틀', minWidth: 200 },
   { id: 'date', label: '작성 날짜', minWidth: 150 },
   { id: 'price', label: '가격', minWidth: 100 },
+  { id: 'EtcPrice', label: '단체가격', minWidth: 100 },
   { id: 'etc', label: '', align: 'right', minWidth: 100 }
 ]
+
 function createData(name, owner, date) {
   return { owner, name, date }
 }
@@ -43,6 +45,7 @@ const TableStickyHeader = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [classes, setClasses] = useState([]) // 상태 추가
   const [editMode, setEditMode] = useState({})
+  const [EtceditMode, setEtcEditMode] = useState({})
 
   // const [title, setTitle] = useState('') // 제목을 위한 상태
   // const [content, setContent] = useState('') // 에디터 내용을 위한 상태
@@ -51,6 +54,7 @@ const TableStickyHeader = () => {
   // 모달 열림/닫힘 상태를 관리하는 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  //가격 저장
   const savePrice = async (id, newPrice) => {
     const classId = id // classId를 id로 설정
     const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
@@ -73,6 +77,36 @@ const TableStickyHeader = () => {
 
       // 저장 후 수정 모드 종료
       setEditMode({ ...editMode, [id]: false })
+    } catch (error) {
+      console.error('Error saving new price:', error)
+
+      // 에러 처리 로직 추가 (예: 사용자에게 알림)
+    }
+  }
+
+  //단체 가격 저장
+  const saveEtcPrice = async (id, newPrice) => {
+    const classId = id // classId를 id로 설정
+    const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+    try {
+      // API 요청 보내기
+      const response = await axios.put(
+        `https://api.knori.or.kr/class/etcprice/${classId}`,
+        {
+          etcprice: newPrice
+        },
+        { headers: { Authorization: `Bearer ${storedToken}` } }
+      )
+
+      // 응답 확인
+      if (response.status !== 200) {
+        throw new Error('가격 저장에 실패했습니다.')
+      }
+
+      console.log(`Saving new price for ${classId}: ${newPrice}`)
+
+      // 저장 후 수정 모드 종료
+      setEtcEditMode({ ...EtceditMode, [id]: false })
     } catch (error) {
       console.error('Error saving new price:', error)
 
@@ -312,6 +346,43 @@ const TableStickyHeader = () => {
                               variant='contained'
                               color='primary'
                               onClick={() => setEditMode({ ...editMode, [row.id]: true })}
+                              style={{ padding: '5px 10px' }}
+                            >
+                              수정
+                            </Button>
+                          </div>
+                        )}
+                      </TableCell>
+                    )
+                  } else if (column.id === 'EtcPrice') {
+                    return (
+                      <TableCell key={column.id} align={column.align}>
+                        {EtceditMode[row.id] ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <TextField
+                              defaultValue={row[column.id]}
+                              onChange={e => (row[column.id] = e.target.value)}
+                              type='text' // 문자열 입력을 허용하기 위해 type을 'text'로 설정
+                              size='small'
+                              variant='outlined'
+                              style={{ width: '100px' }}
+                            />
+                            <Button
+                              variant='contained'
+                              color='primary'
+                              onClick={() => saveEtcPrice(row.id, row[column.id])}
+                              style={{ padding: '5px 10px' }}
+                            >
+                              저장
+                            </Button>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {row[column.id]}
+                            <Button
+                              variant='contained'
+                              color='primary'
+                              onClick={() => setEtcEditMode({ ...EtceditMode, [row.id]: true })}
                               style={{ padding: '5px 10px' }}
                             >
                               수정
