@@ -21,6 +21,8 @@ import Box from '@mui/material/Box'
 import { Typography, TextField } from '@mui/material'
 import Classeditor from 'src/views/apps/class/classAdd'
 
+import { makeStyles } from '@material-ui/core/styles'
+
 import Classeditor2 from 'src/views/apps/class/classUpdate'
 import ClassToggle from 'src/views/apps/class/classesSelector'
 import ScheduleModal from 'src/views/apps/class/schedule'
@@ -34,6 +36,37 @@ const columns = [
   { id: 'EtcPrice', label: '단체가격', minWidth: 100 },
   { id: 'etc', label: '', align: 'right', minWidth: 100 }
 ]
+
+const useStyles = makeStyles(theme => ({
+  tableCell: {
+    padding: theme.spacing(1),
+    [theme.breakpoints.down('sm')]: {
+      padding: theme.spacing(0.5)
+    }
+  },
+  button: {
+    padding: '5px 10px',
+    [theme.breakpoints.down('sm')]: {
+      padding: '3px 6px',
+      fontSize: '0.8rem'
+    }
+  },
+  editContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column',
+      alignItems: 'flex-start'
+    }
+  },
+  textField: {
+    width: '100px',
+    [theme.breakpoints.down('sm')]: {
+      width: '80px'
+    }
+  }
+}))
 
 function createData(name, owner, date) {
   return { owner, name, date }
@@ -303,48 +336,63 @@ const TableStickyHeader = () => {
                 {columns.map(column => {
                   if (column.id === 'etc') {
                     return (
-                      <TableCell key={column.id} align={column.align}>
-                        <Button variant='contained' color='primary' onClick={() => handleOpenScModal(row.id)}>
+                      <TableCell key={column.id} align={column.align} className={classes.tableCell}>
+                        <Button
+                          variant='contained'
+                          color='primary'
+                          className={classes.button}
+                          onClick={() => handleOpenScModal(row.id)}
+                        >
                           시간관리
-                        </Button>{' '}
-                        <Button variant='contained' color='primary' onClick={() => handleOpenEditModal(row)}>
+                        </Button>
+                        <Button
+                          variant='contained'
+                          color='primary'
+                          className={classes.button}
+                          onClick={() => handleOpenEditModal(row)}
+                        >
                           수정하기
-                        </Button>{' '}
-                        <Button variant='contained' color='error' onClick={() => handleOpenDeleteModal(row.id)}>
+                        </Button>
+                        <Button
+                          variant='contained'
+                          color='error'
+                          className={classes.button}
+                          onClick={() => handleOpenDeleteModal(row.id)}
+                        >
                           삭제
                         </Button>
                       </TableCell>
                     )
                   } else if (column.id === 'price') {
                     return (
-                      <TableCell key={column.id} align={column.align}>
+                      <TableCell key={column.id} align={column.align} className={classes.tableCell}>
                         {editMode[row.id] ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className={classes.editContainer}>
                             <TextField
                               defaultValue={row[column.id]}
                               onChange={e => (row[column.id] = e.target.value)}
                               type='number'
                               size='small'
                               variant='outlined'
-                              style={{ width: '100px' }}
+                              className={classes.textField}
                             />
                             <Button
                               variant='contained'
                               color='primary'
                               onClick={() => savePrice(row.id, row[column.id])}
-                              style={{ padding: '5px 10px' }}
+                              className={classes.button}
                             >
                               저장
                             </Button>
                           </div>
                         ) : (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className={classes.editContainer}>
                             {row[column.id]}
                             <Button
                               variant='contained'
                               color='primary'
                               onClick={() => setEditMode({ ...editMode, [row.id]: true })}
-                              style={{ padding: '5px 10px' }}
+                              className={classes.button}
                             >
                               수정
                             </Button>
@@ -354,34 +402,34 @@ const TableStickyHeader = () => {
                     )
                   } else if (column.id === 'EtcPrice') {
                     return (
-                      <TableCell key={column.id} align={column.align}>
+                      <TableCell key={column.id} align={column.align} className={classes.tableCell}>
                         {EtceditMode[row.id] ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className={classes.editContainer}>
                             <TextField
                               defaultValue={row[column.id]}
                               onChange={e => (row[column.id] = e.target.value)}
-                              type='text' // 문자열 입력을 허용하기 위해 type을 'text'로 설정
+                              type='text'
                               size='small'
                               variant='outlined'
-                              style={{ width: '100px' }}
+                              className={classes.textField}
                             />
                             <Button
                               variant='contained'
                               color='primary'
                               onClick={() => saveEtcPrice(row.id, row[column.id])}
-                              style={{ padding: '5px 10px' }}
+                              className={classes.button}
                             >
                               저장
                             </Button>
                           </div>
                         ) : (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className={classes.editContainer}>
                             {row[column.id]}
                             <Button
                               variant='contained'
                               color='primary'
                               onClick={() => setEtcEditMode({ ...EtceditMode, [row.id]: true })}
-                              style={{ padding: '5px 10px' }}
+                              className={classes.button}
                             >
                               수정
                             </Button>
@@ -391,7 +439,7 @@ const TableStickyHeader = () => {
                     )
                   } else {
                     return (
-                      <TableCell key={column.id} align={column.align}>
+                      <TableCell key={column.id} align={column.align} className={classes.tableCell}>
                         {column.id === 'date' ? new Date(row[column.id]).toLocaleDateString() : row[column.id]}
                       </TableCell>
                     )
