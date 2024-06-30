@@ -18,7 +18,7 @@ import classDataDB from 'src/@real-db/app/classDB'
 import Button from '@mui/material/Button'
 import Modal from '@mui/material/Modal'
 import Box from '@mui/material/Box'
-import { Typography, TextField } from '@mui/material'
+import { Typography, TextField, useMediaQuery, Collapse } from '@mui/material'
 import Classeditor from 'src/views/apps/class/classAdd'
 
 import { makeStyles } from '@material-ui/core/styles'
@@ -27,6 +27,7 @@ import Classeditor2 from 'src/views/apps/class/classUpdate'
 import ClassToggle from 'src/views/apps/class/classesSelector'
 import ScheduleModal from 'src/views/apps/class/schedule'
 import { minWidth } from '@mui/system'
+import { useTheme } from '@mui/material/styles'
 
 const columns = [
   { id: 'id', label: 'ID', minWidth: 80 },
@@ -79,6 +80,7 @@ const TableStickyHeader = () => {
   const [classes, setClasses] = useState([]) // 상태 추가
   const [editMode, setEditMode] = useState({})
   const [EtceditMode, setEtcEditMode] = useState({})
+  const [openRow, setOpenRow] = useState(null)
 
   // const [title, setTitle] = useState('') // 제목을 위한 상태
   // const [content, setContent] = useState('') // 에디터 내용을 위한 상태
@@ -86,6 +88,10 @@ const TableStickyHeader = () => {
 
   // 모달 열림/닫힘 상태를 관리하는 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  //모바일
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   //가격 저장
   const savePrice = async (id, newPrice) => {
@@ -287,228 +293,291 @@ const TableStickyHeader = () => {
     setScheduleModalOpen(false)
   }
 
+  const handleRowClick = index => {
+    console.log('자세히보기 테스트 클릭', index)
+    setMobileModalOpen(true)
+  }
+
+  const [MobileModalOpen, setMobileModalOpen] = useState(false)
+
+  const handleMobileCloseModal = () => {
+    setMobileModalOpen(false)
+  }
+
+  if (isMobile) {
+    // 모바일 화면 렌더링
+    return (
+      <div style={{ overflowX: 'auto' }}>
+        {classes.map((row, index) => (
+          <Box key={row.id} marginBottom={2} border={1} borderRadius={2} padding={2}>
+            <Box display='flex' justifyContent='space-between' alignItems='center'>
+              <div>{row.title}</div>
+              <Button variant='contained' color='primary' onClick={() => handleRowClick(index)}>
+                자세히 보기
+              </Button>
+            </Box>
+            <Modal
+              open={MobileModalOpen}
+              onClose={handleMobileCloseModal}
+              aria-labelledby='모달 창'
+              aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
+            >
+              <Box
+                position='absolute'
+                top='50%'
+                left='50%'
+                bgcolor='background.paper'
+                borderRadius={2}
+                boxShadow={24}
+                p={4}
+              >
+                <h2>{row.title} 상세 정보</h2>
+
+                <Button onClick={handleMobileCloseModal} variant='contained' color='secondary'>
+                  닫기
+                </Button>
+              </Box>
+            </Modal>
+            {/* <Collapse in={openRow === index} timeout='auto' unmountOnExit>
+              <Box marginTop={1}> */}
+            {/* 여기서 상세 정보를 렌더링 */}
+            {/* {columns.map(column => (
+                  <div key={column.id}>
+                    <strong>{column.label}:</strong> {row[column.id]}
+                  </div>
+                ))}
+              </Box>
+            </Collapse> */}
+          </Box>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <>
-      <TableContainer component={Paper} sx={{ maxHeight: 700 }}>
-        <Table stickyHeader aria-label='sticky table'>
-          <TableHead>
-            <TableRow>
-              {columns.map((column, index) => (
-                <TableCell key={column.id} align={column.align} sx={{ minWidth: column.minWidth }}>
-                  {index === columns.length - 1 ? ( // 가장 오른쪽 열인 경우
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ overflowX: 'auto' }}>
+        <TableContainer component={Paper} sx={{ maxHeight: 700 }}>
+          <Table stickyHeader aria-label='sticky table'>
+            <TableHead>
+              <TableRow>
+                {columns.map((column, index) => (
+                  <TableCell key={column.id} align={column.align} sx={{ minWidth: column.minWidth }}>
+                    {index === columns.length - 1 ? ( // 가장 오른쪽 열인 경우
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>{column.label}</span>
+                        <Button variant='contained' color='primary' onClick={handleModalOpen}>
+                          추가
+                        </Button>
+                        <Modal
+                          open={isModalOpen}
+                          onClose={handleCloseModal}
+                          aria-labelledby='모달 창'
+                          aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
+                        >
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              transform: 'translate(-50%, -50%)',
+                              width: 1000,
+                              maxHeight: '90vh', // 화면 높이의 90%로 최대 높이 설정
+                              bgcolor: 'background.paper',
+                              boxShadow: 24,
+                              p: 4,
+                              overflow: 'auto' // 스크롤 가능하도록 설정
+                            }}
+                          >
+                            <Classeditor updateNotices={updateClass} closeModal={handleCloseModal} />
+                          </Box>
+                        </Modal>
+                      </div>
+                    ) : (
                       <span>{column.label}</span>
-                      <Button variant='contained' color='primary' onClick={handleModalOpen}>
-                        추가
-                      </Button>
-                      <Modal
-                        open={isModalOpen}
-                        onClose={handleCloseModal}
-                        aria-labelledby='모달 창'
-                        aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
-                      >
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: 1000,
-                            maxHeight: '90vh', // 화면 높이의 90%로 최대 높이 설정
-                            bgcolor: 'background.paper',
-                            boxShadow: 24,
-                            p: 4,
-                            overflow: 'auto' // 스크롤 가능하도록 설정
-                          }}
-                        >
-                          <Classeditor updateNotices={updateClass} closeModal={handleCloseModal} />
-                        </Box>
-                      </Modal>
-                    </div>
-                  ) : (
-                    <span>{column.label}</span>
-                  )}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {classes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
-              <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
-                {columns.map(column => {
-                  if (column.id === 'etc') {
-                    return (
-                      <TableCell key={column.id} align={column.align} className={classes.tableCell}>
-                        <Button
-                          variant='contained'
-                          color='primary'
-                          className={classes.button}
-                          onClick={() => handleOpenScModal(row.id)}
-                        >
-                          시간관리
-                        </Button>
-                        <Button
-                          variant='contained'
-                          color='primary'
-                          className={classes.button}
-                          onClick={() => handleOpenEditModal(row)}
-                        >
-                          수정하기
-                        </Button>
-                        <Button
-                          variant='contained'
-                          color='error'
-                          className={classes.button}
-                          onClick={() => handleOpenDeleteModal(row.id)}
-                        >
-                          삭제
-                        </Button>
-                      </TableCell>
-                    )
-                  } else if (column.id === 'price') {
-                    return (
-                      <TableCell key={column.id} align={column.align} className={classes.tableCell}>
-                        {editMode[row.id] ? (
-                          <div className={classes.editContainer}>
-                            <TextField
-                              defaultValue={row[column.id]}
-                              onChange={e => (row[column.id] = e.target.value)}
-                              type='number'
-                              size='small'
-                              variant='outlined'
-                              className={classes.textField}
-                            />
-                            <Button
-                              variant='contained'
-                              color='primary'
-                              onClick={() => savePrice(row.id, row[column.id])}
-                              className={classes.button}
-                            >
-                              저장
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className={classes.editContainer}>
-                            {row[column.id]}
-                            <Button
-                              variant='contained'
-                              color='primary'
-                              onClick={() => setEditMode({ ...editMode, [row.id]: true })}
-                              className={classes.button}
-                            >
-                              수정
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
-                    )
-                  } else if (column.id === 'EtcPrice') {
-                    return (
-                      <TableCell key={column.id} align={column.align} className={classes.tableCell}>
-                        {EtceditMode[row.id] ? (
-                          <div className={classes.editContainer}>
-                            <TextField
-                              defaultValue={row[column.id]}
-                              onChange={e => (row[column.id] = e.target.value)}
-                              type='text'
-                              size='small'
-                              variant='outlined'
-                              className={classes.textField}
-                            />
-                            <Button
-                              variant='contained'
-                              color='primary'
-                              onClick={() => saveEtcPrice(row.id, row[column.id])}
-                              className={classes.button}
-                            >
-                              저장
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className={classes.editContainer}>
-                            {row[column.id]}
-                            <Button
-                              variant='contained'
-                              color='primary'
-                              onClick={() => setEtcEditMode({ ...EtceditMode, [row.id]: true })}
-                              className={classes.button}
-                            >
-                              수정
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
-                    )
-                  } else {
-                    return (
-                      <TableCell key={column.id} align={column.align} className={classes.tableCell}>
-                        {column.id === 'date' ? new Date(row[column.id]).toLocaleDateString() : row[column.id]}
-                      </TableCell>
-                    )
-                  }
-                })}
+                    )}
+                  </TableCell>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component='div'
-        count={classes.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-      {/* 수정 모달 */}
-      <Modal
-        open={EditModalOpen}
-        onClose={handleCancelEditModal}
-        aria-labelledby='모달 창'
-        aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            maxHeight: '90vh', // 화면 높이의 90%로 최대 높이 설정
-            width: 1000,
-            bgcolor: 'background.paper',
-            boxShadow: 24,
-            p: 4,
-            overflow: 'auto' // 스크롤 가능하도록 설정
-          }}
+            </TableHead>
+            <TableBody>
+              {classes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
+                <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
+                  {columns.map(column => {
+                    if (column.id === 'etc') {
+                      return (
+                        <TableCell key={column.id} align={column.align} className={classes.tableCell}>
+                          <Button
+                            variant='contained'
+                            color='primary'
+                            className={classes.button}
+                            onClick={() => handleOpenScModal(row.id)}
+                          >
+                            시간관리
+                          </Button>{' '}
+                          <Button
+                            variant='contained'
+                            color='primary'
+                            className={classes.button}
+                            onClick={() => handleOpenEditModal(row)}
+                          >
+                            수정하기
+                          </Button>{' '}
+                          <Button
+                            variant='contained'
+                            color='error'
+                            className={classes.button}
+                            onClick={() => handleOpenDeleteModal(row.id)}
+                          >
+                            삭제
+                          </Button>
+                        </TableCell>
+                      )
+                    } else if (column.id === 'price') {
+                      return (
+                        <TableCell key={column.id} align={column.align} className={classes.tableCell}>
+                          {editMode[row.id] ? (
+                            <div className={classes.editContainer}>
+                              <TextField
+                                defaultValue={row[column.id]}
+                                onChange={e => (row[column.id] = e.target.value)}
+                                type='number'
+                                size='small'
+                                variant='outlined'
+                                className={classes.textField}
+                              />{' '}
+                              <Button
+                                variant='contained'
+                                color='primary'
+                                onClick={() => savePrice(row.id, row[column.id])}
+                                className={classes.button}
+                              >
+                                저장
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className={classes.editContainer}>
+                              {row[column.id]}{' '}
+                              <Button
+                                variant='contained'
+                                color='primary'
+                                onClick={() => setEditMode({ ...editMode, [row.id]: true })}
+                                className={classes.button}
+                              >
+                                수정
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      )
+                    } else if (column.id === 'EtcPrice') {
+                      return (
+                        <TableCell key={column.id} align={column.align} className={classes.tableCell}>
+                          {EtceditMode[row.id] ? (
+                            <div className={classes.editContainer}>
+                              <TextField
+                                defaultValue={row[column.id]}
+                                onChange={e => (row[column.id] = e.target.value)}
+                                type='text'
+                                size='small'
+                                variant='outlined'
+                                className={classes.textField}
+                              />{' '}
+                              <Button
+                                variant='contained'
+                                color='primary'
+                                onClick={() => saveEtcPrice(row.id, row[column.id])}
+                                className={classes.button}
+                              >
+                                저장
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className={classes.editContainer}>
+                              {row[column.id]}{' '}
+                              <Button
+                                variant='contained'
+                                color='primary'
+                                onClick={() => setEtcEditMode({ ...EtceditMode, [row.id]: true })}
+                                className={classes.button}
+                              >
+                                수정
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      )
+                    } else {
+                      return (
+                        <TableCell key={column.id} align={column.align} className={classes.tableCell}>
+                          {column.id === 'date' ? new Date(row[column.id]).toLocaleDateString() : row[column.id]}
+                        </TableCell>
+                      )
+                    }
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 100]}
+          component='div'
+          count={classes.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+        {/* 수정 모달 */}
+        <Modal
+          open={EditModalOpen}
+          onClose={handleCancelEditModal}
+          aria-labelledby='모달 창'
+          aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
         >
-          <Classeditor2 updateNotices={updateClass} closeModal={handleCancelEditModal} editData={Edits} />
-        </Box>
-      </Modal>
-      {/* 삭제 모달 */}
-      <DeleteConfirmModal />
-      {/* 시간관리 모달 */}
-      <Modal
-        open={ScheduleModalOpen}
-        onClose={handleCancelScModal}
-        aria-labelledby='모달 창'
-        aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 1000,
-            bgcolor: 'background.paper',
-            boxShadow: 24,
-            p: 4
-          }}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              maxHeight: '90vh', // 화면 높이의 90%로 최대 높이 설정
+              width: 1000,
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 4,
+              overflow: 'auto' // 스크롤 가능하도록 설정
+            }}
+          >
+            <Classeditor2 updateNotices={updateClass} closeModal={handleCancelEditModal} editData={Edits} />
+          </Box>
+        </Modal>
+        {/* 삭제 모달 */}
+        <DeleteConfirmModal />
+        {/* 시간관리 모달 */}
+        <Modal
+          open={ScheduleModalOpen}
+          onClose={handleCancelScModal}
+          aria-labelledby='모달 창'
+          aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
         >
-          <ScheduleModal closeModal={handleCancelScModal} scheduleData={Schedule} />
-        </Box>
-      </Modal>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 1000,
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 4
+            }}
+          >
+            <ScheduleModal closeModal={handleCancelScModal} scheduleData={Schedule} />
+          </Box>
+        </Modal>
+      </div>
     </>
   )
 }
