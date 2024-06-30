@@ -16,6 +16,7 @@ import CrmEarningReportsWithTabs from 'src/views/dashboards/crm/CrmEarningReport
 // ** Custom Component Imports
 import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
 import CardStatsVertical from 'src/@core/components/card-statistics/card-stats-vertical'
+import YearEarnData from 'src/@core/components/card-statistics/card-stats-vertical/yearmoney'
 
 const CrmDashboard = () => {
   return (
@@ -29,23 +30,22 @@ const CrmDashboard = () => {
         </Grid>
         <Grid item xs={6} sm={4} lg={2}>
           <CardStatsVertical
-            stats='1.28k'
             chipText='-12.2%'
             chipColor='default'
             avatarColor='error'
-            title='Total Profit'
-            subtitle='Last week'
+            title='이번 달 예상 매출'
+            subtitle='지난달 대비'
             avatarIcon='tabler:currency-dollar'
           />
         </Grid>
         <Grid item xs={6} sm={4} lg={2}>
-          <CardStatsVertical
+          <YearEarnData
             stats='24.67k'
             chipText='+25.2%'
             avatarColor='info'
             chipColor='default'
-            title='Total Sales'
-            subtitle='Last week'
+            title='이번 연 예상 매출'
+            subtitle='지난해 대비'
             avatarIcon='tabler:chart-bar'
           />
         </Grid>
@@ -67,12 +67,12 @@ const CrmDashboard = () => {
         <Grid item xs={12} md={6} lg={4}>
           <CrmActiveProjects />
         </Grid>
-        <Grid item xs={12} md={6}>
+        {/* <Grid item xs={12} md={6}>
           <CrmLastTransaction />
         </Grid>
         <Grid item xs={12} md={6}>
           <CrmActivityTimeline />
-        </Grid>
+        </Grid> */}
       </Grid>
     </ApexChartWrapper>
   )

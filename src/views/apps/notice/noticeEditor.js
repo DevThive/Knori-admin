@@ -1,50 +1,37 @@
-import React from 'react'
-
-// import { Editor } from 'react-draft-wysiwyg'
-import { EditorState, convertToRaw, convertFromRaw } from 'draft-js'
+import React, { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
+import { EditorState, convertToRaw, convertFromRaw } from 'draft-js'
 
 const Editor = dynamic(() => import('react-draft-wysiwyg').then(mod => mod.Editor), { ssr: false })
 
 const EditorControlled = ({ value, onChange }) => {
-  // 에디터 상태를 관리하는 useState
-  const [editorState, setEditorState] = React.useState(() => {
-    if (value) {
-      const contentState = convertFromRaw(JSON.parse(value))
+  const [NoticeState, setNoticeState] = useState(() => EditorState.createEmpty())
 
-      return EditorState.createWithContent(contentState)
-    }
+  useEffect(() => {
+    // 변환된 contentState가 현재 editorState와 다를 때만 업데이트
+    const contentState = NoticeState.getCurrentContent()
+    const rawContentState = JSON.stringify(convertToRaw(contentState))
 
-    return EditorState.createEmpty()
-  })
-
-  React.useEffect(() => {
-    // 이 함수는 useEffect 내부에서만 사용되므로 여기에 정의합니다.
-    const createEditorState = () => {
-      if (value) {
-        const contentState = convertFromRaw(JSON.parse(value))
-
-        return EditorState.createWithContent(contentState)
+    if (value !== rawContentState) {
+      const newContentState = value ? convertFromRaw(JSON.parse(value)) : null
+      if (newContentState) {
+        const newEditorState = EditorState.createWithContent(newContentState)
+        setNoticeState(newEditorState)
+      } else {
+        setNoticeState(EditorState.createEmpty())
       }
-
-      return EditorState.createEmpty()
     }
+  }, [NoticeState, value])
 
-    setEditorState(createEditorState())
-
-    // 이제 'createEditorState' 함수는 의존성 문제를 일으키지 않습니다.
-  }, [value]) // 'value'는 여전히 의존성 배열에 포함되어야 합니다.
-
-  // 에디터의 상태 변경 시 호출되는 함수
   const onEditorStateChange = newEditorState => {
-    setEditorState(newEditorState)
+    setNoticeState(newEditorState)
     const contentState = newEditorState.getCurrentContent()
     onChange(JSON.stringify(convertToRaw(contentState)))
   }
 
   return (
     <Editor
-      editorState={editorState}
+      editorState={NoticeState}
       onEditorStateChange={onEditorStateChange}
       wrapperClassName='demo-wrapper'
       editorClassName='demo-editor'

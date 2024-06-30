@@ -10,7 +10,8 @@ import Autocomplete from 'src/layouts/components/Autocomplete'
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
 import LanguageDropdown from 'src/@core/layouts/components/shared-components/LanguageDropdown'
-import NotificationDropdown from 'src/@core/layouts/components/shared-components/NotificationDropdown'
+
+// import NotificationDropdown from 'src/@core/layouts/components/shared-components/NotificationDropdown'
 import ShortcutsDropdown from 'src/@core/layouts/components/shared-components/ShortcutsDropdown'
 
 // ** Hook Import
@@ -63,22 +64,22 @@ const notifications = [
 
 const shortcuts = [
   {
-    title: 'Calendar',
-    url: '/apps/calendar',
-    icon: 'tabler:calendar',
-    subtitle: 'Appointments'
-  },
-  {
-    title: 'Invoice App',
+    title: '클래스',
     url: '/apps/invoice/list',
     icon: 'tabler:file-invoice',
     subtitle: 'Manage Accounts'
   },
   {
-    title: 'User App',
-    icon: 'tabler:users',
-    url: '/apps/user/list',
+    title: '공지사항',
+    icon: 'pepicons-pencil:bulletin-notice',
+    url: '/apps/notice',
     subtitle: 'Manage Users'
+  },
+  {
+    title: '캘린더',
+    url: '/apps/calendar',
+    icon: 'tabler:calendar',
+    subtitle: 'Appointments'
   },
   {
     url: '/apps/roles',
@@ -135,7 +136,7 @@ const AppBarContent = props => {
         {auth.user && (
           <>
             <ShortcutsDropdown settings={settings} shortcuts={shortcuts} />
-            <NotificationDropdown settings={settings} notifications={notifications} />
+            {/* <NotificationDropdown settings={settings} notifications={notifications} /> */}
             <UserDropdown settings={settings} />
           </>
         )}

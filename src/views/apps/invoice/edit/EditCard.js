@@ -35,6 +35,7 @@ import themeConfig from 'src/configs/themeConfig'
 // ** Custom Component Imports
 import Repeater from 'src/@core/components/repeater'
 import CustomTextField from 'src/@core/components/mui/text-field'
+import authConfig from 'src/configs/auth'
 
 const CustomInput = forwardRef(({ ...props }, ref) => {
   return <CustomTextField fullWidth inputRef={ref} {...props} sx={{ width: { sm: '250px', xs: '170px' } }} />
@@ -97,42 +98,117 @@ const InvoiceAction = styled(Box)(({ theme }) => ({
   borderLeft: `1px solid ${theme.palette.divider}`
 }))
 
-const EditCard = ({ data }) => {
-  // ** States
-  const [count, setCount] = useState(1)
-  const [selected, setSelected] = useState('')
-  const [clients, setClients] = useState(undefined)
-  const [selectedClient, setSelectedClient] = useState(null)
-  const [dueDate, setDueDate] = useState(data ? new Date(data.invoice.dueDate) : new Date())
-  const [issueDate, setIssueDate] = useState(data ? new Date(data.invoice.issuedDate) : new Date())
+const EditCard = ({ data, onEditChange }) => {
+  const totalAmount = data.invoiceItems.reduce((acc, item) => acc + item.people * 18000, 0)
+
+  // const [selected, setSelected] = useState('')
+  // const [clients, setClients] = useState(undefined)
+  // const [selectedClient, setSelectedClient] = useState(null)
+  // const [dueDate, setDueDate] = useState(data ? new Date(data.dueDate) : new Date())
+  const [issueDate, setIssueDate] = useState(data ? new Date(data.issuedDate) : new Date())
+  const [options, setOptions] = useState([])
+
+  const [invoiceItems, setInvoiceItems] = useState(data.invoiceItems)
+
+  const handlePriceChange = (index, value) => {
+    const updatedItems = invoiceItems.map((item, i) => (i === index ? { ...item, price: value } : item))
+    setInvoiceItems(updatedItems)
+  }
+
+  const handlePeopleChange = (index, value) => {
+    const updatedItems = invoiceItems.map((item, i) => (i === index ? { ...item, people: value } : item))
+    setInvoiceItems(updatedItems)
+  }
+
+  const handleClassNameChange = (index, newValue) => {
+    const newInvoiceItems = [...invoiceItems]
+    newInvoiceItems[index].className = newValue
+    setInvoiceItems(newInvoiceItems) // 상태 업데이트 함수를 호출해야 합니다.
+  }
+
+  const handleContentChange = (index, newValue) => {
+    const newInvoiceItems = [...invoiceItems]
+    newInvoiceItems[index].content = newValue
+    setInvoiceItems(newInvoiceItems) // 상태 업데이트 함수를 호출해야 합니다.
+  }
+
+  const [formData, setFormData] = useState({
+    id: data.id,
+    name: data.name,
+    address: data.address,
+    contact: data.contact,
+    companyEmail: data.companyEmail,
+    note: data.note
+  })
+
+  // 입력 핸들러 함수
+  const handleInputChange = e => {
+    const { name, value } = e.target
+
+    const updatedFormData = {
+      ...formData,
+      [name]: value
+    }
+
+    setFormData(updatedFormData) // 상태 업데이트
+
+    onEditChange(updatedFormData) // 상위 컴포넌트로 변경된 데이터 전달
+  }
+
+  // API 호출을 수행하는 함수를 정의합니다.
+  const sendInvoiceItemToApi = async item => {
+    const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+    // console.log(item)
+
+    try {
+      const response = await axios.put(`https://api.knori.or.kr/invoice-item/${item.id}`, item, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`
+        }
+      })
+
+      alert('저장되었습니다.')
+
+      // console.log('서버 응답:', response.data)
+
+      // 성공적으로 데이터를 보냈다면, 사용자에게 피드백을 주거나 상태를 업데이트할 수 있습니다.
+    } catch (error) {
+      console.error('API 호출 오류:', error)
+
+      // 오류 처리 로직을 여기에 추가하세요.
+    }
+  }
+
+  // // 가격과 인원수 상태 초기화
+  // const [price, setPrice] = useState(data.price) // 초기 가격값
+  // const [people, setPeople] = useState(data.totalPeople) // 초기 인원수
+
+  // 총액 계산
 
   // ** Hook
   const theme = useTheme()
+
   useEffect(() => {
-    axios.get('/apps/invoice/clients').then(response => {
-      if (response.data && clients === undefined) {
-        setClients(response.data)
-        setSelected(response.data[0].name)
-        setSelectedClient(response.data[0])
-      }
-    })
-  }, [clients])
+    // 컴포넌트가 마운트될 때 API 요청
+    axios
+      .get('https://api.knori.or.kr/class') // 여기서 URL은 실제 API의 URL로 대체해야 합니다.
+      .then(response => {
+        setOptions(response.data) // API로부터 받은 데이터를 상태에 저장
+      })
+      .catch(error => {
+        console.error('There was an error!', error)
+      })
+  }, [])
 
-  // ** Deletes form
-  const deleteForm = e => {
-    e.preventDefault()
+  // // ** Deletes form
+  // const deleteForm = e => {
+  //   e.preventDefault()
 
-    // @ts-ignore
-    e.target.closest('.repeater-wrapper').remove()
-  }
+  //   // @ts-ignore
+  //   e.target.closest('.repeater-wrapper').remove()
+  // }
 
-  // ** Handle Invoice To Change
-  const handleInvoiceChange = e => {
-    setSelected(e.target.value)
-    if (clients !== undefined) {
-      setSelectedClient(clients.filter(i => i.name === e.target.value)[0])
-    }
-  }
   if (data) {
     return (
       <Card>
@@ -141,42 +217,14 @@ const EditCard = ({ data }) => {
             <Grid item xl={6} xs={12} sx={{ mb: { xl: 0, xs: 4 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ mb: 6, display: 'flex', alignItems: 'center' }}>
-                  <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                    <path
-                      fillRule='evenodd'
-                      clipRule='evenodd'
-                      fill={theme.palette.primary.main}
-                      d='M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z'
-                    />
-                    <path
-                      fill='#161616'
-                      opacity={0.06}
-                      fillRule='evenodd'
-                      clipRule='evenodd'
-                      d='M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z'
-                    />
-                    <path
-                      fill='#161616'
-                      opacity={0.06}
-                      fillRule='evenodd'
-                      clipRule='evenodd'
-                      d='M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z'
-                    />
-                    <path
-                      fillRule='evenodd'
-                      clipRule='evenodd'
-                      fill={theme.palette.primary.main}
-                      d='M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z'
-                    />
-                  </svg>
                   <Typography variant='h4' sx={{ ml: 2.5, fontWeight: 700, lineHeight: '24px' }}>
                     {themeConfig.templateName}
                   </Typography>
                 </Box>
                 <div>
-                  <Typography sx={{ mb: 2, color: 'text.secondary' }}>Office 149, 450 South Brand Brooklyn</Typography>
-                  <Typography sx={{ mb: 2, color: 'text.secondary' }}>San Diego County, CA 91905, USA</Typography>
-                  <Typography sx={{ color: 'text.secondary' }}>+1 (123) 456 7891, +44 (876) 543 2198</Typography>
+                  <Typography sx={{ mb: 2, color: 'text.secondary' }}>경기도 양주시 백석읍 기산로 548</Typography>
+                  <Typography sx={{ mb: 2, color: 'text.secondary' }}>(재)케이놀이문화재단</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>+82 (031) 876 9500</Typography>
                 </div>
               </Box>
             </Grid>
@@ -184,11 +232,11 @@ const EditCard = ({ data }) => {
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xl: 'flex-end', xs: 'flex-start' } }}>
                 <Box sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
                   <Typography variant='h4' sx={{ mr: 2, width: '105px' }}>
-                    Invoice
+                    청구서
                   </Typography>
                   <CustomTextField
                     fullWidth
-                    value={data.invoice.id}
+                    value={data.id}
                     sx={{ width: { sm: '250px', xs: '170px' } }}
                     InputProps={{
                       disabled: true,
@@ -197,22 +245,20 @@ const EditCard = ({ data }) => {
                   />
                 </Box>
                 <Box sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
-                  <Typography sx={{ mr: 3, width: '100px', color: 'text.secondary' }}>Date Issued:</Typography>
-                  <DatePicker
+                  <Typography sx={{ mr: 3, width: '100px', color: 'text.secondary' }}>발행일 :</Typography>
+                  <CustomTextField
                     id='issue-date'
-                    selected={issueDate}
-                    showDisabledMonthNavigation
-                    customInput={<CustomInput />}
-                    onChange={date => setIssueDate(date)}
-                  />
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography sx={{ mr: 3, width: '100px', color: 'text.secondary' }}>Date Due:</Typography>
-                  <DatePicker
-                    selected={dueDate}
-                    showDisabledMonthNavigation
-                    customInput={<CustomInput />}
-                    onChange={date => setDueDate(date)}
+                    value={new Date(data.issuedDate).toLocaleDateString()}
+                    sx={{ width: { sm: '250px', xs: '170px' } }}
+                    InputProps={{
+                      disabled: true,
+                      startAdornment: <InputAdornment position='start'></InputAdornment>
+                    }}
+
+                    // customInput={<CustomInput />}
+                    // onChange={date => {
+                    //   setIssueDate(date)
+                    // }}
                   />
                 </Box>
               </Box>
@@ -226,86 +272,41 @@ const EditCard = ({ data }) => {
           <Grid container>
             <Grid item xs={12} sm={6} sx={{ mb: { lg: 0, xs: 4 } }}>
               <Typography variant='h6' sx={{ mb: 6 }}>
-                Invoice To:
+                받는 사람 :
               </Typography>
-              <CustomTextField
-                select
-                sx={{
-                  mb: 4,
-                  width: '200px',
-                  '& .MuiFilledInput-input.MuiSelect-select': {
-                    minWidth: '11rem !important'
-                  }
-                }}
-                SelectProps={{ value: selected, onChange: e => handleInvoiceChange(e) }}
-              >
-                {clients !== undefined ? (
-                  clients.map(client => (
-                    <MenuItem key={client.name} value={client.name}>
-                      {client.name}
-                    </MenuItem>
-                  ))
-                ) : (
-                  <MenuItem value=''>No clients</MenuItem>
-                )}
-              </CustomTextField>
-              {selectedClient !== null ? (
-                <>
-                  <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{selectedClient.company}</Typography>
-                  <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{selectedClient.address}</Typography>
-                  <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{selectedClient.contact}</Typography>
-                  <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{selectedClient.companyEmail}</Typography>
-                </>
-              ) : null}
+              <div>고객명 :</div>
+              <CustomTextField defaultValue={formData.name} onChange={handleInputChange} name='name' />
+              <div>주소 :</div>
+              <CustomTextField fullWidth defaultValue={formData.address} onChange={handleInputChange} name='address' />
+              <div>연락처 :</div>
+              <CustomTextField defaultValue={formData.contact} onChange={handleInputChange} name='contact' />
+              <div>이메일 :</div>
+              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{formData.companyEmail}</Typography>
             </Grid>
             <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: ['flex-start', 'flex-end'] }}>
               <div>
                 <Typography variant='h6' sx={{ mb: 6 }}>
-                  Bill To:
+                  청구 대상 :
                 </Typography>
                 <TableContainer>
                   <Table>
                     <TableBody sx={{ '& .MuiTableCell-root': { py: `${theme.spacing(0.75)} !important` } }}>
                       <TableRow>
                         <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>Total Due:</Typography>
+                          <Typography sx={{ color: 'text.secondary' }}>총 지불액 :</Typography>
                         </MUITableCell>
                         <MUITableCell>
-                          <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>
-                            {data.paymentDetails.totalDue}
+                          <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{totalAmount}원</Typography>
+                        </MUITableCell>
+                      </TableRow>
+                      <TableRow>
+                        <MUITableCell>
+                          <Typography sx={{ color: 'text.secondary' }}>결제 방식 :</Typography>
+                        </MUITableCell>
+                        <MUITableCell>
+                          <Typography sx={{ color: 'text.secondary' }}>
+                            {/* {data.paymentDetails.bankName} */}
                           </Typography>
-                        </MUITableCell>
-                      </TableRow>
-                      <TableRow>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>Bank name:</Typography>
-                        </MUITableCell>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>{data.paymentDetails.bankName}</Typography>
-                        </MUITableCell>
-                      </TableRow>
-                      <TableRow>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>Country:</Typography>
-                        </MUITableCell>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>{data.paymentDetails.country}</Typography>
-                        </MUITableCell>
-                      </TableRow>
-                      <TableRow>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>IBAN:</Typography>
-                        </MUITableCell>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>{data.paymentDetails.iban}</Typography>
-                        </MUITableCell>
-                      </TableRow>
-                      <TableRow>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>SWIFT code:</Typography>
-                        </MUITableCell>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>{data.paymentDetails.swiftCode}</Typography>
                         </MUITableCell>
                       </TableRow>
                     </TableBody>
@@ -319,132 +320,117 @@ const EditCard = ({ data }) => {
         <Divider />
 
         <RepeaterWrapper>
-          <Repeater count={count}>
-            {i => {
-              const Tag = i === 0 ? Box : Collapse
+          {invoiceItems.map((item, index) => {
+            const Tag = index === 0 ? Box : Collapse
 
-              return (
-                <Tag key={i} className='repeater-wrapper' {...(i !== 0 ? { in: true } : {})}>
-                  <Grid container>
-                    <RepeatingContent item xs={12}>
-                      <Grid container sx={{ py: 4, width: '100%', pr: { lg: 0, xs: 4 } }}>
-                        <Grid item lg={6} md={5} xs={12} sx={{ px: 4, my: { lg: 0, xs: 2 } }}>
-                          <Typography className='col-title' sx={{ mb: { md: 2, xs: 0 }, color: 'text.secondary' }}>
-                            Item
-                          </Typography>
-                          <CustomTextField select fullWidth defaultValue='App Design'>
-                            <MenuItem value='App Design'>App Design</MenuItem>
-                            <MenuItem value='App Customization'>App Customization</MenuItem>
-                            <MenuItem value='ABC Template'>ABC Template</MenuItem>
-                            <MenuItem value='App Development'>App Development</MenuItem>
-                          </CustomTextField>
-                          <CustomTextField
-                            rows={2}
-                            fullWidth
-                            multiline
-                            sx={{ mt: 3.5 }}
-                            defaultValue='Customization & Bug Fixes'
-                          />
-                        </Grid>
-                        <Grid item lg={2} md={3} xs={12} sx={{ px: 4, my: { lg: 0, xs: 2 } }}>
-                          <Typography className='col-title' sx={{ mb: { md: 2, xs: 0 }, color: 'text.secondary' }}>
-                            Cost
-                          </Typography>
-                          <CustomTextField
-                            type='number'
-                            placeholder='24'
-                            defaultValue='24'
-                            InputProps={{ inputProps: { min: 0 } }}
-                          />
-                          <Typography sx={{ mt: 3.5, mr: 2, color: 'text.secondary' }}>Discount:</Typography>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-                            <Typography sx={{ mr: 2, color: 'text.secondary' }}>0%</Typography>
-                            <Tooltip title='Tax 1' placement='top'>
-                              <Typography sx={{ mr: 2, color: 'text.secondary' }}>0%</Typography>
-                            </Tooltip>
-                            <Tooltip title='Tax 2' placement='top'>
-                              <Typography sx={{ color: 'text.secondary' }}>0%</Typography>
-                            </Tooltip>
-                          </Box>
-                        </Grid>
-                        <Grid item lg={2} md={2} xs={12} sx={{ px: 4, my: { lg: 0, xs: 2 } }}>
-                          <Typography className='col-title' sx={{ mb: { md: 2, xs: 0 }, color: 'text.secondary' }}>
-                            Hours
-                          </Typography>
-                          <CustomTextField
-                            type='number'
-                            placeholder='1'
-                            defaultValue='1'
-                            InputProps={{ inputProps: { min: 0 } }}
-                          />
-                        </Grid>
-                        <Grid item lg={2} md={1} xs={12} sx={{ px: 4, my: { lg: 0 }, mt: 2 }}>
-                          <Typography className='col-title' sx={{ mb: { md: 2, xs: 0 }, color: 'text.secondary' }}>
-                            Price
-                          </Typography>
-                          <Typography sx={{ color: 'text.secondary' }}>$24.00</Typography>
+            return (
+              <Tag key={index} className='repeater-wrapper' {...(index !== 0 ? { in: true } : {})}>
+                <Grid container>
+                  <RepeatingContent item xs={12}>
+                    <Grid container sx={{ py: 4, width: '100%', pr: { lg: 0, xs: 4 } }}>
+                      <Grid item lg={6} md={5} xs={12} sx={{ px: 4, my: { lg: 0, xs: 2 } }}>
+                        <Typography className='col-title' sx={{ mb: { md: 2, xs: 0 }, color: 'text.secondary' }}>
+                          클래스명 & 설명
+                        </Typography>
+                        <CustomTextField
+                          select
+                          fullWidth
+                          defaultValue={`${item.className}`}
+                          onChange={e => handleClassNameChange(index, e.target.value)}
+                        >
+                          {options.map((option, index) => (
+                            <MenuItem key={index} value={option.title}>
+                              {option.title}
+                            </MenuItem>
+                          ))}
+                        </CustomTextField>
+                        <CustomTextField
+                          rows={2}
+                          fullWidth
+                          multiline
+                          sx={{ mt: 3.5 }}
+                          placeholder='메모'
+                          defaultValue={item.content}
+                          onChange={e => handleContentChange(index, e.target.value)}
+                        />
+                      </Grid>
+                      <Grid item lg={2} md={3} xs={12} sx={{ px: 4, my: { lg: 0, xs: 2 } }}>
+                        <Typography className='col-title' sx={{ mb: { md: 2, xs: 0 }, color: 'text.secondary' }}>
+                          가격
+                        </Typography>
+                        <CustomTextField
+                          type='number'
+                          placeholder='24'
+                          defaultValue={item.price}
+                          onChange={e => handlePriceChange(index, e.target.value)}
+                          InputProps={{ inputProps: { min: 0 } }}
+                        />
+                      </Grid>
+                      <Grid item lg={2} md={2} xs={12} sx={{ px: 4, my: { lg: 0, xs: 2 } }}>
+                        <Typography className='col-title' sx={{ mb: { md: 2, xs: 0 }, color: 'text.secondary' }}>
+                          인원수
+                        </Typography>
+                        <CustomTextField
+                          type='number'
+                          placeholder='1'
+                          defaultValue={item.people}
+                          onChange={e => handlePeopleChange(index, e.target.value)}
+                          InputProps={{ inputProps: { min: 0 } }}
+                        />
+                      </Grid>
+                      <Grid item lg={2} md={2} xs={12} sx={{ px: 4, my: { lg: 0 }, mt: 2 }}>
+                        <Typography className='col-title' sx={{ mb: { md: 2, xs: 0 }, color: 'text.secondary' }}>
+                          총액
+                        </Typography>
+                        <CustomTextField
+                          value={item.price * item.people}
+                          InputProps={{
+                            disabled: true,
+                            endAdornment: <InputAdornment position='end'>원</InputAdornment>
+                          }}
+                          sx={{ color: 'text.secondary' }}
+                        ></CustomTextField>
+                        <Grid item rows={2} sx={{ mt: 6, display: 'flex', justifyContent: 'flex-end' }}>
+                          <Button onClick={() => sendInvoiceItemToApi(item)}>저장하기</Button>
                         </Grid>
                       </Grid>
-                      <InvoiceAction>
-                        <IconButton size='small' onClick={deleteForm}>
-                          <Icon icon='tabler:x' fontSize='1.25rem' />
-                        </IconButton>
-                      </InvoiceAction>
-                    </RepeatingContent>
-                  </Grid>
-                </Tag>
-              )
-            }}
-          </Repeater>
-
-          <Grid container sx={{ mt: 4 }}>
-            <Grid item xs={12} sx={{ px: 0 }}>
-              <Button variant='contained' onClick={() => setCount(count + 1)}>
-                Add Item
-              </Button>
-            </Grid>
-          </Grid>
+                    </Grid>
+                  </RepeatingContent>
+                </Grid>
+              </Tag>
+            )
+          })}
         </RepeaterWrapper>
 
         <Divider />
 
         <CardContent sx={{ p: [`${theme.spacing(6)} !important`, `${theme.spacing(10)} !important`] }}>
           <Grid container>
-            <Grid item xs={12} sm={7} lg={6} sx={{ order: { sm: 1, xs: 2 } }}>
-              <Box sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
-                <Typography variant='body2' sx={{ mr: 2, fontWeight: 500, lineHeight: 'normal' }}>
-                  Salesperson:
-                </Typography>
-                <CustomTextField fullWidth defaultValue='Tommy Shelby' />
+            <Grid item xs={12} sm={7} lg={9} sx={{ order: { sm: 1, xs: 2 } }}>
+              <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>구매자 :</Typography>
+                <Typography sx={{ color: 'text.secondary' }}>{data.name}</Typography>
               </Box>
-              <CustomTextField fullWidth defaultValue='Thanks for your business' />
+
+              <Typography sx={{ color: 'text.secondary' }}>구매해주셔서 감사합니다.</Typography>
             </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={5}
-              lg={6}
-              sx={{ mb: { sm: 0, xs: 4 }, order: { sm: 2, xs: 1 }, display: 'flex', justifyContent: 'flex-end' }}
-            >
-              <Box sx={{ minWidth: 150, '& > *': { width: '100%' } }}>
-                <CalcWrapper>
-                  <Typography sx={{ color: 'text.secondary' }}>Subtotal:</Typography>
-                  <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>$1800</Typography>
-                </CalcWrapper>
-                <CalcWrapper>
-                  <Typography sx={{ color: 'text.secondary' }}>Discount:</Typography>
-                  <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>$28</Typography>
-                </CalcWrapper>
-                <CalcWrapper sx={{ mb: '0 !important' }}>
-                  <Typography sx={{ color: 'text.secondary' }}>Tax:</Typography>
-                  <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>21%</Typography>
-                </CalcWrapper>
-                <Divider sx={{ my: `${theme.spacing(2)} !important` }} />
-                <CalcWrapper>
-                  <Typography sx={{ color: 'text.secondary' }}>Total:</Typography>
-                  <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>$1690</Typography>
-                </CalcWrapper>
-              </Box>
+            <Grid item xs={12} sm={5} lg={3} sx={{ mb: { sm: 0, xs: 4 }, order: { sm: 2, xs: 1 } }}>
+              <CalcWrapper>
+                <Typography sx={{ color: 'text.secondary' }}>소계 :</Typography>
+                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{totalAmount}원</Typography>
+              </CalcWrapper>
+
+              {/* <Divider sx={{ my: `${theme.spacing(2)} !important` }} /> */}
+              <CalcWrapper>
+                <Typography sx={{ color: 'text.secondary' }}>할인 :</Typography>
+                <CustomTextField type='number' placeholder='0' InputProps={{ inputProps: { min: 0 } }} />
+              </CalcWrapper>
+
+              <Divider sx={{ my: `${theme.spacing(2)} !important` }} />
+              <CalcWrapper>
+                <Typography sx={{ color: 'text.secondary' }}>총액 :</Typography>
+                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{totalAmount}원</Typography>
+              </CalcWrapper>
             </Grid>
           </Grid>
         </CardContent>
@@ -456,14 +442,15 @@ const EditCard = ({ data }) => {
             htmlFor='invoice-note'
             sx={{ mb: 2, fontWeight: 500, fontSize: theme.typography.body2.fontSize, lineHeight: 'normal' }}
           >
-            Note:
+            매모 :
           </InputLabel>
           <CustomTextField
             rows={2}
             fullWidth
             multiline
-            id='invoice-note'
-            defaultValue='It was a pleasure working with you and your team. We hope you will keep us in mind for future freelance projects. Thank You!'
+            name='note'
+            defaultValue={formData.note}
+            onChange={handleInputChange}
           />
         </CardContent>
       </Card>

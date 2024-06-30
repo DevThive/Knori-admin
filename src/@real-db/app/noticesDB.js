@@ -16,7 +16,8 @@ async function fetchDataAndProcess() {
         id: item.id,
         owner: item.user ? item.user : 'Admin',
         name: item.content_name,
-        date: new Date(item.createdAt) // 날짜 데이터로 변환하여 저장
+        date: new Date(item.createdAt), // 날짜 데이터로 변환하여 저장
+        content: item.content
       }
     })
 

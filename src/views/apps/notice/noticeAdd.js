@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useEffect } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 
 import axios from 'axios'
 
@@ -19,11 +19,55 @@ import authConfig from 'src/configs/auth'
 
 // ** Source code imports
 
+import { Editor } from '@tinymce/tinymce-react'
+
 // ** Icon Imports
 
 // ** Styles
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 import FileUploaderNotice from './noticeFile'
+
+const MyEditor = React.memo(({ content, setContent }) => {
+  return (
+    <Editor
+      apiKey='26sy0i9udfu6ywiu9vyfsyplgxq6m59eh12xj34jvmns430g'
+      value={content} // initialValue 대신에 value 사용
+      onEditorChange={(newContent, editor) => {
+        setContent(newContent)
+      }}
+      init={{
+        height: 500,
+        menubar: false,
+        plugins: [
+          'advlist',
+          'autolink',
+          'lists',
+          'link',
+          'image',
+          'charmap',
+          'preview',
+          'anchor',
+          'searchreplace',
+          'visualblocks',
+          'code',
+          'fullscreen',
+          'insertdatetime',
+          'media',
+          'table',
+          'code',
+          'help',
+          'wordcount'
+        ],
+        toolbar:
+          'undo redo | blocks | ' +
+          'bold italic forecolor | alignleft aligncenter ' +
+          'alignright alignjustify | bullist numlist outdent indent | ' +
+          'removeformat | help',
+        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+      }}
+    />
+  )
+})
 
 const Noticeeditor = props => {
   // ** States
@@ -35,7 +79,7 @@ const Noticeeditor = props => {
     setFile(selectedFile)
   }
   useEffect(() => {
-    console.log(typeof file) // 이 로그는 file 상태가 변경될 때마다 출력됩니다.
+    // console.log(typeof file) // 이 로그는 file 상태가 변경될 때마다 출력됩니다.
   }, [file])
 
   const handleTitleChange = e => {
@@ -54,11 +98,11 @@ const Noticeeditor = props => {
       const formData = new FormData()
       formData.append('content_name', title)
       formData.append('content', content)
-      formData.append('files', file)
+      formData.append('file', file)
 
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
 
-      const response = await axios.post('http://localhost:4001/notices', formData, {
+      const response = await axios.post('https://api.knori.or.kr/notices', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${storedToken}`
@@ -70,6 +114,7 @@ const Noticeeditor = props => {
       // 여기에서 props로 받은 함수들을 호출
       props.updateNotices(response.data) // `notices` 상태 업데이트
       props.closeModal() // 모달 닫기
+      window.location.reload()
     } catch (error) {
       console.error('데이터 전송 중 오류가 발생했습니다:', error)
     }
@@ -85,9 +130,7 @@ const Noticeeditor = props => {
               <CustomTextField fullWidth label='제목' placeholder='제목' value={title} onChange={handleTitleChange} />
             </Grid>
             <Grid item xs={12}>
-              <EditorWrapper>
-                <EditorControlled onChange={handleEditorChange} value={content} />
-              </EditorWrapper>
+              <MyEditor content={content} setContent={setContent} />
             </Grid>
 
             <Grid item xs={12}>

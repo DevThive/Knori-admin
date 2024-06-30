@@ -20,8 +20,15 @@ import Modal from '@mui/material/Modal'
 import Box from '@mui/material/Box'
 import { Typography } from '@mui/material'
 import Noticeeditor from 'src/views/apps/notice/noticeAdd'
+import noticeSelector from 'src/views/apps/notice/noticeSelector'
 
+// ** selector import
+
+import Switch from '@mui/material/Switch'
+import FormGroup from '@mui/material/FormGroup'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import Noticeeditor2 from 'src/views/apps/notice/noticeUpdate'
+import TogglePrivacy from 'src/views/apps/notice/noticeSelector'
 
 const columns = [
   { id: 'owner', label: '작성자', minWidth: 80 },
@@ -187,6 +194,7 @@ const TableStickyHeader = () => {
                       <Button variant='contained' color='primary' onClick={handleModalOpen}>
                         추가
                       </Button>
+
                       <Modal
                         open={isModalOpen}
                         onClose={handleCloseModal}
@@ -224,6 +232,7 @@ const TableStickyHeader = () => {
                     if (column.id === 'etc') {
                       return (
                         <TableCell key={column.id} align={column.align}>
+                          <TogglePrivacy id={row.id} />{' '}
                           <Button variant='contained' color='primary' onClick={() => handleOpenEditModal(row)}>
                             수정하기
                           </Button>{' '}

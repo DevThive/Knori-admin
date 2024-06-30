@@ -15,7 +15,7 @@ import OptionsMenu from 'src/@core/components/option-menu'
 
 const data = [
   {
-    amount: '1.2k',
+    amount: '1.23k',
     trendNumber: 4.2,
     icon: 'tabler:shadow',
     title: 'Direct Source',

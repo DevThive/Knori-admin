@@ -898,7 +898,7 @@ mock.onGet('apps/invoice/single-invoice').reply(config => {
     const responseData = {
       invoice: invoiceData[0],
       paymentDetails: {
-        totalDue: '$12,110.55',
+        totalDue: '25000',
         bankName: 'American Bank',
         country: 'United States',
         iban: 'ETD95476213874685',

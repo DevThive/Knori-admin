@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 // ** MUI Imports
 import Tab from '@mui/material/Tab'
@@ -14,6 +14,10 @@ import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import { useTheme } from '@mui/material/styles'
 
+import axios from 'axios'
+
+import authConfig from 'src/configs/auth'
+
 // ** Custom Components Import
 import Icon from 'src/@core/components/icon'
 import OptionsMenu from 'src/@core/components/option-menu'
@@ -23,86 +27,155 @@ import ReactApexcharts from 'src/@core/components/react-apexcharts'
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 
-const tabData = [
-  {
-    type: 'orders',
-    avatarIcon: 'tabler:shopping-cart',
-    series: [{ data: [28, 10, 45, 38, 15, 30, 35, 28, 8] }]
-  },
-  {
-    type: 'sales',
-    avatarIcon: 'tabler:chart-bar',
-    series: [{ data: [35, 25, 15, 40, 42, 25, 48, 8, 30] }]
-  },
-  {
-    type: 'profit',
-    avatarIcon: 'tabler:currency-dollar',
-    series: [{ data: [10, 22, 27, 33, 42, 32, 27, 22, 8] }]
-  },
-  {
-    type: 'income',
-    avatarIcon: 'tabler:chart-pie-2',
-    series: [{ data: [5, 9, 12, 18, 20, 25, 30, 36, 48] }]
-  }
-]
-
-const renderTabs = (value, theme) => {
-  return tabData.map((item, index) => {
-    const RenderAvatar = item.type === value ? CustomAvatar : Avatar
-
-    return (
-      <Tab
-        key={index}
-        value={item.type}
-        label={
-          <Box
-            sx={{
-              width: 110,
-              height: 94,
-              borderWidth: 1,
-              display: 'flex',
-              alignItems: 'center',
-              borderRadius: '10px',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              borderStyle: item.type === value ? 'solid' : 'dashed',
-              borderColor: item.type === value ? theme.palette.primary.main : theme.palette.divider
-            }}
-          >
-            <RenderAvatar
-              variant='rounded'
-              {...(item.type === value && { skin: 'light' })}
-              sx={{ mb: 2, width: 34, height: 34, ...(item.type !== value && { backgroundColor: 'action.selected' }) }}
-            >
-              <Icon icon={item.avatarIcon} />
-            </RenderAvatar>
-            <Typography sx={{ fontWeight: 500, color: 'text.secondary', textTransform: 'capitalize' }}>
-              {item.type}
-            </Typography>
-          </Box>
-        }
-      />
-    )
-  })
-}
-
-const renderTabPanels = (value, theme, options, colors) => {
-  return tabData.map((item, index) => {
-    const max = Math.max(...item.series[0].data)
-    const seriesIndex = item.series[0].data.indexOf(max)
-    const finalColors = colors.map((color, i) => (seriesIndex === i ? hexToRGBA(theme.palette.primary.main, 1) : color))
-
-    return (
-      <TabPanel key={index} value={item.type}>
-        <ReactApexcharts type='bar' height={263} options={{ ...options, colors: finalColors }} series={item.series} />
-      </TabPanel>
-    )
-  })
-}
-
 const CrmEarningReportsWithTabs = () => {
   // ** State
-  const [value, setValue] = useState('orders')
+  const [value, setValue] = useState('매출')
+
+  const [tabData, setTabData] = useState([
+    {
+      type: '매출',
+      avatarIcon: 'tabler:shopping-cart',
+      series: [{ data: [28, 10, 45, 38, 15, 30, 35, 28, 8, 42, 32, 12] }]
+    },
+    {
+      type: '예약',
+      avatarIcon: 'tabler:chart-bar',
+      series: [{ data: [35, 25, 15, 40, 42, 25, 48, 8, 30] }]
+    }
+  ])
+
+  async function updateSalesData() {
+    const year = new Date().getFullYear()
+    const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+    const salesData = await Promise.all(
+      [...Array(12).keys()].map(async month => {
+        try {
+          const response = await axios.get(`https://api.knori.or.kr/dashboard/monthly-cost/${year}/${month + 1}`, {
+            headers: {
+              Authorization: `Bearer ${storedToken}`
+            }
+          })
+
+          return response.data
+        } catch (error) {
+          console.error(`API 호출 중 오류 발생: ${error}`)
+
+          return 0
+        }
+      })
+    )
+
+    // 매출 데이터를 업데이트
+    setTabData(currentTabData =>
+      currentTabData.map(tab => (tab.type === '매출' ? { ...tab, series: [{ data: salesData, type: '매출' }] } : tab))
+    )
+  }
+
+  async function updateReservationData() {
+    const year = new Date().getFullYear()
+    const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+    // 여기에서 예약 데이터를 가져오는 로직을 구현해야 합니다.
+    // 예시로, 예약 데이터를 가져오는 API 엔드포인트를 사용했습니다.
+    // 실제 API 엔드포인트는 달라질 수 있습니다.
+    const reservationData = await Promise.all(
+      [...Array(12).keys()].map(async month => {
+        try {
+          const response = await axios.get(
+            `https://api.knori.or.kr/dashboard/monthly-reservation/${year}/${month + 1}`,
+            {
+              headers: {
+                Authorization: `Bearer ${storedToken}`
+              }
+            }
+          )
+
+          // console.log(response.data)
+
+          return response.data
+        } catch (error) {
+          console.error(`API 호출 중 오류 발생: ${error}`)
+
+          return 0
+        }
+      })
+    )
+
+    // 예약 데이터를 업데이트
+    setTabData(currentTabData =>
+      currentTabData.map(tab =>
+        tab.type === '예약' ? { ...tab, series: [{ data: reservationData, type: '예약' }] } : tab
+      )
+    )
+  }
+
+  useEffect(() => {
+    updateSalesData()
+    updateReservationData()
+  }, [])
+
+  const renderTabPanels = (value, theme, options, colors) => {
+    return tabData.map((item, index) => {
+      const max = Math.max(...item.series[0].data)
+      const seriesIndex = item.series[0].data.indexOf(max)
+
+      const finalColors = colors.map((color, i) =>
+        seriesIndex === i ? hexToRGBA(theme.palette.primary.main, 1) : color
+      )
+
+      return (
+        <TabPanel key={index} value={item.type}>
+          <ReactApexcharts type='bar' height={263} options={{ ...options, colors: finalColors }} series={item.series} />
+        </TabPanel>
+      )
+    })
+  }
+
+  const renderTabs = (value, theme) => {
+    return tabData.map((item, index) => {
+      const RenderAvatar = item.type === value ? CustomAvatar : Avatar
+
+      return (
+        <Tab
+          key={index}
+          value={item.type}
+          label={
+            <Box
+              sx={{
+                width: 110,
+                height: 94,
+                borderWidth: 1,
+                display: 'flex',
+                alignItems: 'center',
+                borderRadius: '10px',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                borderStyle: item.type === value ? 'solid' : 'dashed',
+                borderColor: item.type === value ? theme.palette.primary.main : theme.palette.divider
+              }}
+            >
+              <RenderAvatar
+                variant='rounded'
+                {...(item.type === value && { skin: 'light' })}
+                sx={{
+                  mb: 2,
+                  width: 34,
+                  height: 34,
+                  ...(item.type !== value && { backgroundColor: 'action.selected' })
+                }}
+              >
+                <Icon icon={item.avatarIcon} />
+              </RenderAvatar>
+              <Typography sx={{ fontWeight: 500, color: 'text.secondary', textTransform: 'capitalize' }}>
+                {item.type}
+              </Typography>
+            </Box>
+          }
+        />
+      )
+    })
+  }
 
   // ** Hook
   const theme = useTheme()
@@ -111,6 +184,14 @@ const CrmEarningReportsWithTabs = () => {
     setValue(newValue)
   }
   const colors = Array(9).fill(hexToRGBA(theme.palette.primary.main, 0.16))
+
+  let currentIndex = 0
+
+  const seriesTypes = {
+    0: '매출', // 첫 번째 시리즈의 타입은 '매출'
+    1: '예약' // 두 번째 시리즈의 타입은 '예약' (예시)
+    // 추가적인 시리즈 타입 정보...
+  }
 
   const options = {
     chart: {
@@ -130,7 +211,21 @@ const CrmEarningReportsWithTabs = () => {
     tooltip: { enabled: false },
     dataLabels: {
       offsetY: -15,
-      formatter: val => `${val}k`,
+      formatter: function (val, opts) {
+        const type = opts.w.config.series[opts.seriesIndex].type
+
+        // console.log(opts)
+
+        if (type === '매출') {
+          const millions = val / 10000
+
+          // 만원 단위로 포맷팅하여 반환
+          return `${millions.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}만원`
+        } else if (type === '예약') {
+          // 건수로 반환
+          return `${val}건`
+        }
+      },
       style: {
         fontWeight: 500,
         colors: [theme.palette.text.secondary],
@@ -158,7 +253,7 @@ const CrmEarningReportsWithTabs = () => {
     xaxis: {
       axisTicks: { show: false },
       axisBorder: { color: theme.palette.divider },
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+      categories: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
       labels: {
         style: {
           colors: theme.palette.text.disabled,
@@ -170,7 +265,20 @@ const CrmEarningReportsWithTabs = () => {
     yaxis: {
       labels: {
         offsetX: -15,
-        formatter: val => `$${val}k`,
+        formatter: function (val) {
+          // val 값이 1만 이상일 경우
+          // if (val >= 10000) {
+          //   // "만원" 단위로 포맷팅
+          //   const millions = val / 10000
+
+          //   return `${millions.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}만원`
+          // } else {
+          //   // 1만 이하일 경우 "건"으로 표시
+          //   return `${val}건`
+          // }
+
+          return `${val}`
+        },
         style: {
           colors: theme.palette.text.disabled,
           fontFamily: theme.typography.fontFamily,
@@ -196,14 +304,15 @@ const CrmEarningReportsWithTabs = () => {
   return (
     <Card>
       <CardHeader
-        title='Earning Reports'
+        title='매출 및 예약 보고서'
         subheader='Yearly Earnings Overview'
-        action={
-          <OptionsMenu
-            options={['Last Week', 'Last Month', 'Last Year']}
-            iconButtonProps={{ size: 'small', sx: { color: 'text.disabled' } }}
-          />
-        }
+
+        // action={
+        //   <OptionsMenu
+        //     options={['Last Week', 'Last Month', 'Last Year']}
+        //     iconButtonProps={{ size: 'small', sx: { color: 'text.disabled' } }}
+        //   />
+        // }
       />
       <CardContent sx={{ '& .MuiTabPanel-root': { p: 0 } }}>
         <TabContext value={value}>
@@ -219,28 +328,6 @@ const CrmEarningReportsWithTabs = () => {
             }}
           >
             {renderTabs(value, theme)}
-            <Tab
-              disabled
-              value='add'
-              label={
-                <Box
-                  sx={{
-                    width: 110,
-                    height: 94,
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderRadius: '10px',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    border: `1px dashed ${theme.palette.divider}`
-                  }}
-                >
-                  <Avatar variant='rounded' sx={{ width: 34, height: 34, backgroundColor: 'action.selected' }}>
-                    <Icon icon='tabler:plus' />
-                  </Avatar>
-                </Box>
-              }
-            />
           </TabList>
           {renderTabPanels(value, theme, options, colors)}
         </TabContext>
