@@ -1,14 +1,20 @@
 // ** Redux Imports
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
+import authConfig from 'src/configs/auth'
+
 // ** Axios Imports
 import axios from 'axios'
 
 // ** Fetch Events
 export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async calendars => {
-  const response = await axios.get('/apps/calendar/events', {
-    params: {
-      calendars
+  const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+
+  // console.log(calendars)
+
+  const response = await axios.get('https://api.knori.or.kr/calendar', {
+    headers: {
+      Authorization: `Bearer ${storedToken}`
     }
   })
 

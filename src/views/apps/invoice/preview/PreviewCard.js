@@ -36,6 +36,8 @@ const CalcWrapper = styled(Box)(({ theme }) => ({
 
 const PreviewCard = ({ data }) => {
   // ** Hook
+  // console.log(data)
+  const totalAmount = data.invoiceItems.reduce((acc, item) => acc + item.people * item.price, 0)
   const theme = useTheme()
   if (data) {
     return (
@@ -45,7 +47,7 @@ const PreviewCard = ({ data }) => {
             <Grid item sm={6} xs={12} sx={{ mb: { sm: 0, xs: 4 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ mb: 6, display: 'flex', alignItems: 'center' }}>
-                  <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                  {/* <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
                     <path
                       fillRule='evenodd'
                       clipRule='evenodd'
@@ -72,15 +74,15 @@ const PreviewCard = ({ data }) => {
                       fill={theme.palette.primary.main}
                       d='M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z'
                     />
-                  </svg>
+                  </svg> */}
                   <Typography variant='h4' sx={{ ml: 2.5, fontWeight: 700, lineHeight: '24px' }}>
                     {themeConfig.templateName}
                   </Typography>
                 </Box>
                 <div>
-                  <Typography sx={{ mb: 2, color: 'text.secondary' }}>Office 149, 450 South Brand Brooklyn</Typography>
-                  <Typography sx={{ mb: 2, color: 'text.secondary' }}>San Diego County, CA 91905, USA</Typography>
-                  <Typography sx={{ color: 'text.secondary' }}>+1 (123) 456 7891, +44 (876) 543 2198</Typography>
+                  <Typography sx={{ mb: 2, color: 'text.secondary' }}>경기도 양주시 백석읍 기산로 548</Typography>
+                  <Typography sx={{ mb: 2, color: 'text.secondary' }}>(재)케이놀이문화재단</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>+82 (031) 876 9500</Typography>
                 </div>
               </Box>
             </Grid>
@@ -90,28 +92,30 @@ const PreviewCard = ({ data }) => {
                   <TableBody sx={{ '& .MuiTableCell-root': { py: `${theme.spacing(1.5)} !important` } }}>
                     <TableRow>
                       <MUITableCell>
-                        <Typography variant='h4'>Invoice</Typography>
+                        <Typography variant='h4'>청구서</Typography>
                       </MUITableCell>
                       <MUITableCell>
-                        <Typography variant='h4'>{`#${data.invoice.id}`}</Typography>
+                        <Typography variant='h4'>{`#${data.id}`}</Typography>
                       </MUITableCell>
                     </TableRow>
                     <TableRow>
                       <MUITableCell>
-                        <Typography sx={{ color: 'text.secondary' }}>Date Issued:</Typography>
+                        <Typography sx={{ color: 'text.secondary' }}>발행일 :</Typography>
                       </MUITableCell>
                       <MUITableCell>
-                        <Typography sx={{ color: 'text.secondary' }}>{data.invoice.issuedDate}</Typography>
+                        <Typography sx={{ color: 'text.secondary' }}>
+                          {new Date(data.issuedDate).toLocaleDateString()}
+                        </Typography>
                       </MUITableCell>
                     </TableRow>
-                    <TableRow>
+                    {/* <TableRow>
                       <MUITableCell>
-                        <Typography sx={{ color: 'text.secondary' }}>Date Due:</Typography>
+                        <Typography sx={{ color: 'text.secondary' }}>마감일 :</Typography>
                       </MUITableCell>
                       <MUITableCell>
-                        <Typography sx={{ color: 'text.secondary' }}>{data.invoice.dueDate}</Typography>
+                        <Typography sx={{ color: 'text.secondary' }}>{data.dueDate}</Typography>
                       </MUITableCell>
-                    </TableRow>
+                    </TableRow> */}
                   </TableBody>
                 </Table>
               </Box>
@@ -125,49 +129,42 @@ const PreviewCard = ({ data }) => {
           <Grid container>
             <Grid item xs={12} sm={6} sx={{ mb: { lg: 0, xs: 4 } }}>
               <Typography variant='h6' sx={{ mb: 6 }}>
-                Invoice To:
+                받는 사람 :
               </Typography>
-              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.invoice.name}</Typography>
-              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.invoice.company}</Typography>
-              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.invoice.address}</Typography>
-              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.invoice.contact}</Typography>
-              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.invoice.companyEmail}</Typography>
+              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.name}</Typography>
+              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.company}</Typography>
+              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.address}</Typography>
+              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.contact}</Typography>
+              <Typography sx={{ mb: 1.5, color: 'text.secondary' }}>{data.companyEmail}</Typography>
             </Grid>
             <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: ['flex-start', 'flex-end'] }}>
               <div>
                 <Typography variant='h6' sx={{ mb: 6 }}>
-                  Bill To:
+                  청구 대상 :
                 </Typography>
                 <TableContainer>
                   <Table>
                     <TableBody sx={{ '& .MuiTableCell-root': { py: `${theme.spacing(0.75)} !important` } }}>
                       <TableRow>
                         <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>Total Due:</Typography>
+                          <Typography sx={{ color: 'text.secondary' }}>총 지불액 :</Typography>
                         </MUITableCell>
                         <MUITableCell>
-                          <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>
-                            {data.paymentDetails.totalDue}
+                          <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{totalAmount}원</Typography>
+                        </MUITableCell>
+                      </TableRow>
+                      <TableRow>
+                        <MUITableCell>
+                          <Typography sx={{ color: 'text.secondary' }}>결제 방식 :</Typography>
+                        </MUITableCell>
+                        <MUITableCell>
+                          <Typography sx={{ color: 'text.secondary' }}>
+                            {/* {data.paymentDetails.bankName} */}
                           </Typography>
                         </MUITableCell>
                       </TableRow>
-                      <TableRow>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>Bank name:</Typography>
-                        </MUITableCell>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>{data.paymentDetails.bankName}</Typography>
-                        </MUITableCell>
-                      </TableRow>
-                      <TableRow>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>Country:</Typography>
-                        </MUITableCell>
-                        <MUITableCell>
-                          <Typography sx={{ color: 'text.secondary' }}>{data.paymentDetails.country}</Typography>
-                        </MUITableCell>
-                      </TableRow>
-                      <TableRow>
+
+                      {/* <TableRow>
                         <MUITableCell>
                           <Typography sx={{ color: 'text.secondary' }}>IBAN:</Typography>
                         </MUITableCell>
@@ -182,7 +179,7 @@ const PreviewCard = ({ data }) => {
                         <MUITableCell>
                           <Typography sx={{ color: 'text.secondary' }}>{data.paymentDetails.swiftCode}</Typography>
                         </MUITableCell>
-                      </TableRow>
+                      </TableRow> */}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -197,11 +194,11 @@ const PreviewCard = ({ data }) => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Item</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell>hours</TableCell>
-                <TableCell>qty</TableCell>
-                <TableCell>Total</TableCell>
+                <TableCell>클래스명</TableCell>
+                <TableCell>설명</TableCell>
+                <TableCell>가격</TableCell>
+                <TableCell>인원수</TableCell>
+                <TableCell>총액</TableCell>
               </TableRow>
             </TableHead>
             <TableBody
@@ -212,34 +209,15 @@ const PreviewCard = ({ data }) => {
                 }
               }}
             >
-              <TableRow>
-                <TableCell>Premium Branding Package</TableCell>
-                <TableCell>Branding & Promotion</TableCell>
-                <TableCell>48</TableCell>
-                <TableCell>1</TableCell>
-                <TableCell>$32</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Social Media</TableCell>
-                <TableCell>Social media templates</TableCell>
-                <TableCell>42</TableCell>
-                <TableCell>1</TableCell>
-                <TableCell>$28</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Web Design</TableCell>
-                <TableCell>Web designing package</TableCell>
-                <TableCell>46</TableCell>
-                <TableCell>1</TableCell>
-                <TableCell>$24</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>SEO</TableCell>
-                <TableCell>Search engine optimization</TableCell>
-                <TableCell>40</TableCell>
-                <TableCell>1</TableCell>
-                <TableCell>$22</TableCell>
-              </TableRow>
+              {data.invoiceItems.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell>{item.className}</TableCell>
+                  <TableCell>{item.content}</TableCell>
+                  <TableCell>{item.price}</TableCell>
+                  <TableCell>{item.people}</TableCell>
+                  <TableCell>{item.people * item.price}원</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
@@ -248,29 +226,28 @@ const PreviewCard = ({ data }) => {
           <Grid container>
             <Grid item xs={12} sm={7} lg={9} sx={{ order: { sm: 1, xs: 2 } }}>
               <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-                <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Salesperson:</Typography>
-                <Typography sx={{ color: 'text.secondary' }}>Tommy Shelby</Typography>
+                <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>구매자 :</Typography>
+                <Typography sx={{ color: 'text.secondary' }}>{data.name}</Typography>
               </Box>
 
-              <Typography sx={{ color: 'text.secondary' }}>Thanks for your business</Typography>
+              <Typography sx={{ color: 'text.secondary' }}>구매해주셔서 감사합니다.</Typography>
             </Grid>
             <Grid item xs={12} sm={5} lg={3} sx={{ mb: { sm: 0, xs: 4 }, order: { sm: 2, xs: 1 } }}>
               <CalcWrapper>
-                <Typography sx={{ color: 'text.secondary' }}>Subtotal:</Typography>
-                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>$1800</Typography>
+                <Typography sx={{ color: 'text.secondary' }}>소계 :</Typography>
+                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{totalAmount}원</Typography>
               </CalcWrapper>
+
+              {/* <Divider sx={{ my: `${theme.spacing(2)} !important` }} /> */}
               <CalcWrapper>
-                <Typography sx={{ color: 'text.secondary' }}>Discount:</Typography>
-                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>$28</Typography>
+                <Typography sx={{ color: 'text.secondary' }}>할인 :</Typography>
+                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>0%</Typography>
               </CalcWrapper>
-              <CalcWrapper sx={{ mb: '0 !important' }}>
-                <Typography sx={{ color: 'text.secondary' }}>Tax:</Typography>
-                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>21%</Typography>
-              </CalcWrapper>
+
               <Divider sx={{ my: `${theme.spacing(2)} !important` }} />
               <CalcWrapper>
-                <Typography sx={{ color: 'text.secondary' }}>Total:</Typography>
-                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>$1690</Typography>
+                <Typography sx={{ color: 'text.secondary' }}>총액 :</Typography>
+                <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{totalAmount}원</Typography>
               </CalcWrapper>
             </Grid>
           </Grid>
@@ -281,10 +258,9 @@ const PreviewCard = ({ data }) => {
         <CardContent sx={{ px: [6, 10] }}>
           <Typography sx={{ color: 'text.secondary' }}>
             <Typography component='span' sx={{ mr: 1.5, fontWeight: 500, color: 'inherit' }}>
-              Note:
+              메모 :
             </Typography>
-            It was a pleasure working with you and your team. We hope you will keep us in mind for future freelance
-            projects. Thank You!
+            {data.note}
           </Typography>
         </CardContent>
       </Card>
