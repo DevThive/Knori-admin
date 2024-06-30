@@ -14,6 +14,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const blankEvent = {
   title: '',
+
   start: '',
   end: '',
   allDay: true,

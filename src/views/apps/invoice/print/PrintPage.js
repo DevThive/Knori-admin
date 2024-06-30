@@ -75,6 +75,9 @@ const InvoicePrint = ({ id }) => {
     // console.log(data)
     const totalAmount = data.invoiceItems.reduce((acc, item) => acc + item.people * item.price, 0)
 
+    // console.log(data)
+    const totalAmount = data.invoiceItems.reduce((acc, item) => acc + item.people * item.price, 0)
+
     return (
       <Box sx={{ p: 12, pb: 6 }}>
         <Grid container>
