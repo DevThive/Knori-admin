@@ -140,6 +140,7 @@ const ContactList = () => {
     handleDialogClose()
   }
 
+  //.
   if (isMobile) {
     return (
       <Box p={2}>
