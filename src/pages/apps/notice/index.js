@@ -18,12 +18,13 @@ import fetchDataAndProcess from 'src/@real-db/app/noticesDB'
 import Button from '@mui/material/Button'
 import Modal from '@mui/material/Modal'
 import Box from '@mui/material/Box'
-import { Typography } from '@mui/material'
+import { Typography, useMediaQuery, TextField } from '@mui/material'
 import Noticeeditor from 'src/views/apps/notice/noticeAdd'
 import noticeSelector from 'src/views/apps/notice/noticeSelector'
 
 // ** selector import
 
+import { useTheme } from '@mui/material/styles'
 import Switch from '@mui/material/Switch'
 import FormGroup from '@mui/material/FormGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -52,6 +53,10 @@ const TableStickyHeader = () => {
 
   // 모달 열림/닫힘 상태를 관리하는 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  //모바일
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   useEffect(() => {
     const fetchData = async () => {
@@ -179,6 +184,138 @@ const TableStickyHeader = () => {
       console.error('Failed to delete the notice:', error.response ? error.response.data : error)
     }
   }
+
+  const [MobileModalOpen, setMobileModalOpen] = useState(false)
+  const [selectedRow, setSelectedRow] = useState(null)
+
+  const handleRowClick = index => {
+    setSelectedRow(notices[index])
+    setMobileModalOpen(true)
+  }
+
+  const handleMobileCloseModal = () => {
+    setMobileModalOpen(false)
+    setSelectedRow(null)
+  }
+
+  const handleDelete = () => {
+    // 삭제 로직을 여기에 추가하세요
+    console.log('삭제 버튼 클릭됨')
+    handleMobileCloseModal()
+  }
+
+  const handleChange = e => {
+    const { name, value } = e.target
+    setSelectedRow(prevRow => ({
+      ...prevRow,
+      [name]: value
+    }))
+  }
+
+  useEffect(() => {
+    if (selectedRow) {
+      console.log('selectedRow:', selectedRow)
+    }
+  }, [selectedRow])
+
+  if (isMobile) {
+    // 모바일 화면 렌더링
+    return (
+      <div style={{ overflowX: 'auto' }}>
+        {notices.map((row, index) => (
+          <Box key={row.id} marginBottom={2} border={1} borderRadius={2} padding={2}>
+            <Box display='flex' justifyContent='space-between' alignItems='center'>
+              <div>{row.name}</div>
+              <Button variant='contained' color='primary' onClick={() => handleRowClick(index)}>
+                자세히 보기
+              </Button>
+            </Box>
+          </Box>
+        ))}
+
+        {selectedRow && (
+          <Modal
+            open={MobileModalOpen}
+            onClose={handleMobileCloseModal}
+            aria-labelledby='모달 창'
+            aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
+          >
+            <Box
+              position='absolute'
+              top='50%'
+              left='50%'
+              width='95%'
+              maxWidth='100vw'
+              bgcolor='background.paper'
+              borderRadius={2}
+              boxShadow={24}
+              p={4}
+              style={{ transform: 'translate(-50%, -50%)', overflow: 'auto' }} // 모달 창을 화면 중앙에 위치시키기 위한 스타일 추가
+            >
+              <h2>{selectedRow.title} 상세 정보</h2>
+              <TextField
+                fullWidth
+                margin='normal'
+                label='타이틀'
+                value={selectedRow.name}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+              <TextField
+                fullWidth
+                margin='normal'
+                label='작성 날짜'
+                value={new Date(selectedRow.date).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+              {/* <TextField
+                fullWidth
+                margin='normal'
+                label='클래스 가격'
+                name='classPrice'
+                value={selectedRow.price}
+                onChange={handleChange}
+              />
+              <TextField
+                fullWidth
+                margin='normal'
+                label='단체 가격'
+                name='groupPrice'
+                value={selectedRow.EtcPrice}
+                onChange={handleChange}
+              /> */}
+
+              <Box display='flex' justifyContent='space-between' marginTop={2}>
+                <Button onClick={handleDelete} variant='contained' color='secondary'>
+                  삭제
+                </Button>
+                <Button onClick={handleMobileCloseModal} variant='contained' color='primary'>
+                  닫기
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
+        )}
+      </div>
+    )
+  }
+
+  // const handleOpenScModal = data => {
+  //   setSchedule(data)
+  //   setScheduleModalOpen(true)
+  // }
+
+  // const handleCancelScModal = () => {
+  //   setSchedule([])
+  //   setScheduleModalOpen(false)
+  // }
 
   return (
     <>

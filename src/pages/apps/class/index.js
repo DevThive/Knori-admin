@@ -198,7 +198,7 @@ const TableStickyHeader = () => {
 
   // 실제 삭제를 수행하는 함수
   const confirmDeleteNotice = async () => {
-    await deleteNotice(selectedId)
+    await deleteClass(selectedId)
     handleCloseDeleteModal()
   }
 
@@ -261,7 +261,7 @@ const TableStickyHeader = () => {
     setEditModalOpen(false)
   }
 
-  const deleteNotice = async id => {
+  const deleteClass = async id => {
     const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
     try {
       // axios를 이용한 삭제 API 호출
@@ -331,6 +331,12 @@ const TableStickyHeader = () => {
     }))
   }
 
+  // useEffect(() => {
+  //   if (selectedRow) {
+  //     console.log('selectedRow:', selectedRow)
+  //   }
+  // }, [selectedRow])
+
   if (isMobile) {
     // 모바일 화면 렌더링
     return (
@@ -357,11 +363,13 @@ const TableStickyHeader = () => {
               position='absolute'
               top='50%'
               left='50%'
+              width='95%'
+              maxWidth='100vw'
               bgcolor='background.paper'
               borderRadius={2}
               boxShadow={24}
               p={4}
-              style={{ transform: 'translate(-50%, -50%)' }} // 모달 창을 화면 중앙에 위치시키기 위한 스타일 추가
+              style={{ transform: 'translate(-50%, -50%)', overflow: 'auto' }} // 모달 창을 화면 중앙에 위치시키기 위한 스타일 추가
             >
               <h2>{selectedRow.title} 상세 정보</h2>
               <TextField
@@ -377,7 +385,11 @@ const TableStickyHeader = () => {
                 fullWidth
                 margin='normal'
                 label='작성 날짜'
-                value={selectedRow.createdDate}
+                value={new Date(selectedRow.date).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
                 InputProps={{
                   readOnly: true
                 }}
@@ -387,7 +399,7 @@ const TableStickyHeader = () => {
                 margin='normal'
                 label='클래스 가격'
                 name='classPrice'
-                value={selectedRow.classPrice}
+                value={selectedRow.price}
                 onChange={handleChange}
               />
               <TextField
@@ -395,7 +407,7 @@ const TableStickyHeader = () => {
                 margin='normal'
                 label='단체 가격'
                 name='groupPrice'
-                value={selectedRow.groupPrice}
+                value={selectedRow.EtcPrice}
                 onChange={handleChange}
               />
 
