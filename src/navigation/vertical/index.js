@@ -85,7 +85,7 @@ const navigation = () => {
       children: [
         {
           title: '문의',
-          path: '/pages/faq',
+          path: '/apps/contact',
           icon: 'tabler:help'
         },
         {

@@ -140,6 +140,12 @@ const ContactList = () => {
     handleDialogClose()
   }
 
+  useEffect(() => {
+    if (selectedRow) {
+      console.log('selectedRow:', selectedRow)
+    }
+  }, [selectedRow])
+
   //.
   if (isMobile) {
     return (
@@ -163,6 +169,10 @@ const ContactList = () => {
               <>
                 <Typography variant='body1' gutterBottom>
                   문의 내용: {selectedRow.contact}
+                </Typography>
+
+                <Typography variant='body1' gutterBottom>
+                  고객 번호: {selectedRow.phone}
                 </Typography>
                 <TextField
                   fullWidth
@@ -239,6 +249,9 @@ const ContactList = () => {
                       <Box margin={1}>
                         <Typography style={{ marginTop: '10px' }} variant='subtitle1' gutterBottom>
                           문의 내용: {row.contact}
+                        </Typography>
+                        <Typography style={{ marginTop: '10px' }} variant='subtitle1' gutterBottom>
+                          고객 번호: {row.phone}
                         </Typography>
                         {/* 구분선을 추가하여 문의 내용과 답변 입력 부분을 시각적으로 분리합니다. */}
                         <hr style={{ marginBottom: '10px' }} />
