@@ -18,7 +18,7 @@ import classDataDB from 'src/@real-db/app/classDB'
 import Button from '@mui/material/Button'
 import Modal from '@mui/material/Modal'
 import Box from '@mui/material/Box'
-import { Typography, TextField, useMediaQuery, Collapse } from '@mui/material'
+import { Typography, TextField, useMediaQuery, Collapse, List, ListItem, ListItemText } from '@mui/material'
 import Classeditor from 'src/views/apps/class/classAdd'
 
 import { makeStyles } from '@material-ui/core/styles'
@@ -340,17 +340,26 @@ const TableStickyHeader = () => {
   if (isMobile) {
     // 모바일 화면 렌더링
     return (
-      <div style={{ overflowX: 'auto' }}>
-        {classes.map((row, index) => (
-          <Box key={row.id} marginBottom={2} border={1} borderRadius={2} padding={2}>
-            <Box display='flex' justifyContent='space-between' alignItems='center'>
-              <div>{row.title}</div>
-              <Button variant='contained' color='primary' onClick={() => handleRowClick(index)}>
-                자세히 보기
-              </Button>
-            </Box>
-          </Box>
-        ))}
+      <Box p={2}>
+        <List>
+          {classes.map((row, index) => (
+            <Paper key={row.id} variant='outlined' style={{ marginBottom: '1rem', padding: '1rem' }}>
+              <ListItem>
+                <ListItemText
+                  primary={`${row.title.length > 10 ? row.title.slice(0, 10) + '...' : row.title}`}
+                  sx={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                />
+                <Button variant='contained' color='primary' onClick={() => handleRowClick(index)}>
+                  자세히 보기
+                </Button>
+              </ListItem>
+            </Paper>
+          ))}
+        </List>
 
         {selectedRow && (
           <Modal
@@ -422,7 +431,7 @@ const TableStickyHeader = () => {
             </Box>
           </Modal>
         )}
-      </div>
+      </Box>
     )
   }
 
