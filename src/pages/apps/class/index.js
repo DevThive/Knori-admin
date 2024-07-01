@@ -198,7 +198,7 @@ const TableStickyHeader = () => {
 
   // 실제 삭제를 수행하는 함수
   const confirmDeleteNotice = async () => {
-    await deleteNotice(selectedId)
+    await deleteClass(selectedId)
     handleCloseDeleteModal()
   }
 
@@ -261,7 +261,7 @@ const TableStickyHeader = () => {
     setEditModalOpen(false)
   }
 
-  const deleteNotice = async id => {
+  const deleteClass = async id => {
     const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
     try {
       // axios를 이용한 삭제 API 호출
@@ -283,6 +283,19 @@ const TableStickyHeader = () => {
   const [ScheduleModalOpen, setScheduleModalOpen] = useState(false)
   const [Schedule, setSchedule] = useState([])
 
+  const [MobileModalOpen, setMobileModalOpen] = useState(false)
+  const [selectedRow, setSelectedRow] = useState(null)
+
+  const handleRowClick = index => {
+    setSelectedRow(classes[index])
+    setMobileModalOpen(true)
+  }
+
+  const handleMobileCloseModal = () => {
+    setMobileModalOpen(false)
+    setSelectedRow(null)
+  }
+
   const handleOpenScModal = data => {
     setSchedule(data)
     setScheduleModalOpen(true)
@@ -293,16 +306,36 @@ const TableStickyHeader = () => {
     setScheduleModalOpen(false)
   }
 
-  const handleRowClick = index => {
-    console.log('자세히보기 테스트 클릭', index)
-    setMobileModalOpen(true)
+  // const handleRowClick = index => {
+  //   setSelectedRow(classes[index])
+  //   setMobileModalOpen(true)
+  // }
+
+  // const [MobileModalOpen, setMobileModalOpen] = useState(false)
+
+  // const handleMobileCloseModal = () => {
+  //   setMobileModalOpen(false)
+  // }
+
+  const handleDelete = () => {
+    // 삭제 로직을 여기에 추가하세요
+    console.log('삭제 버튼 클릭됨')
+    handleMobileCloseModal()
   }
 
-  const [MobileModalOpen, setMobileModalOpen] = useState(false)
-
-  const handleMobileCloseModal = () => {
-    setMobileModalOpen(false)
+  const handleChange = e => {
+    const { name, value } = e.target
+    setSelectedRow(prevRow => ({
+      ...prevRow,
+      [name]: value
+    }))
   }
+
+  // useEffect(() => {
+  //   if (selectedRow) {
+  //     console.log('selectedRow:', selectedRow)
+  //   }
+  // }, [selectedRow])
 
   if (isMobile) {
     // 모바일 화면 렌더링
@@ -316,40 +349,79 @@ const TableStickyHeader = () => {
                 자세히 보기
               </Button>
             </Box>
-            <Modal
-              open={MobileModalOpen}
-              onClose={handleMobileCloseModal}
-              aria-labelledby='모달 창'
-              aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
-            >
-              <Box
-                position='absolute'
-                top='50%'
-                left='50%'
-                bgcolor='background.paper'
-                borderRadius={2}
-                boxShadow={24}
-                p={4}
-              >
-                <h2>{row.title} 상세 정보</h2>
+          </Box>
+        ))}
 
-                <Button onClick={handleMobileCloseModal} variant='contained' color='secondary'>
+        {selectedRow && (
+          <Modal
+            open={MobileModalOpen}
+            onClose={handleMobileCloseModal}
+            aria-labelledby='모달 창'
+            aria-describedby='모달 창을 닫으려면 ESC 키를 누르거나 바깥을 클릭하세요'
+          >
+            <Box
+              position='absolute'
+              top='50%'
+              left='50%'
+              width='95%'
+              maxWidth='100vw'
+              bgcolor='background.paper'
+              borderRadius={2}
+              boxShadow={24}
+              p={4}
+              style={{ transform: 'translate(-50%, -50%)', overflow: 'auto' }} // 모달 창을 화면 중앙에 위치시키기 위한 스타일 추가
+            >
+              <h2>{selectedRow.title} 상세 정보</h2>
+              <TextField
+                fullWidth
+                margin='normal'
+                label='타이틀'
+                value={selectedRow.title}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+              <TextField
+                fullWidth
+                margin='normal'
+                label='작성 날짜'
+                value={new Date(selectedRow.date).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+              <TextField
+                fullWidth
+                margin='normal'
+                label='클래스 가격'
+                name='classPrice'
+                value={selectedRow.price}
+                onChange={handleChange}
+              />
+              <TextField
+                fullWidth
+                margin='normal'
+                label='단체 가격'
+                name='groupPrice'
+                value={selectedRow.EtcPrice}
+                onChange={handleChange}
+              />
+
+              <Box display='flex' justifyContent='space-between' marginTop={2}>
+                <Button onClick={handleDelete} variant='contained' color='secondary'>
+                  삭제
+                </Button>
+                <Button onClick={handleMobileCloseModal} variant='contained' color='primary'>
                   닫기
                 </Button>
               </Box>
-            </Modal>
-            {/* <Collapse in={openRow === index} timeout='auto' unmountOnExit>
-              <Box marginTop={1}> */}
-            {/* 여기서 상세 정보를 렌더링 */}
-            {/* {columns.map(column => (
-                  <div key={column.id}>
-                    <strong>{column.label}:</strong> {row[column.id]}
-                  </div>
-                ))}
-              </Box>
-            </Collapse> */}
-          </Box>
-        ))}
+            </Box>
+          </Modal>
+        )}
       </div>
     )
   }

@@ -5,10 +5,22 @@ import axios from 'axios'
 import authConfig from 'src/configs/auth'
 
 // ** MUI Imports
+import { useTheme } from '@mui/material/styles'
 import TablePagination from '@mui/material/TablePagination'
 import contactDB from 'src/@real-db/app/contactDB'
 import Modal from '@mui/material/Modal'
-import { Typography } from '@mui/material'
+import {
+  Typography,
+  useMediaQuery,
+  List,
+  ListItem,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  DialogActions
+} from '@mui/material'
 
 import {
   Table,
@@ -37,6 +49,10 @@ const ContactList = () => {
   const [contact, setContact] = useState([])
   const [openRowId, setOpenRowId] = useState(null)
   const [answers, setAnswers] = useState({})
+
+  //모바일
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,6 +121,72 @@ const ContactList = () => {
       // 예외 처리 강화
       console.error('답변 제출 중 오류가 발생했습니다.', error)
     }
+  }
+  const [selectedRow, setSelectedRow] = useState(null)
+  const [answerText, setAnswerText] = useState('')
+
+  const handleListItemClick = row => {
+    setSelectedRow(row)
+    setAnswerText(row.contact_answer || '') // 기존 답변이 있으면 불러오기
+  }
+
+  const handleDialogClose = () => {
+    setSelectedRow(null)
+  }
+
+  const handleDialogSubmit = () => {
+    // 필요한 경우 서버로 답변 텍스트를 전송하는 로직 추가
+    console.log('답변 저장:', answerText)
+    handleDialogClose()
+  }
+
+  if (isMobile) {
+    return (
+      <Box p={2}>
+        <List>
+          {contact.map(row => (
+            <Paper key={row.id} variant='outlined' style={{ marginBottom: '1rem', padding: '1rem' }}>
+              <ListItem>
+                <ListItemText primary={`문의자: ${row.user_name}`} />
+                <Button variant='contained' color='primary' onClick={() => handleListItemClick(row)}>
+                  자세히 보기
+                </Button>
+              </ListItem>
+            </Paper>
+          ))}
+        </List>
+        <Dialog open={Boolean(selectedRow)} onClose={handleDialogClose}>
+          <DialogTitle>문의 상세</DialogTitle>
+          <DialogContent>
+            {selectedRow && (
+              <>
+                <Typography variant='body1' gutterBottom>
+                  문의 내용: {selectedRow.contact}
+                </Typography>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  variant='outlined'
+                  value={answerText}
+                  onChange={e => setAnswerText(e.target.value)}
+                  placeholder='여기에 답변을 입력하세요...'
+                  margin='normal'
+                />
+              </>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose} color='primary'>
+              취소
+            </Button>
+            <Button onClick={handleDialogSubmit} color='primary'>
+              저장하기
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    )
   }
 
   return (

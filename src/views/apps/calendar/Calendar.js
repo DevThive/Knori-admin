@@ -122,6 +122,7 @@ const Calendar = props => {
         }
       },
       dateClick(info) {
+        // console.log(info)
         const ev = { ...blankEvent }
         ev.start = info.date
         ev.end = info.date
