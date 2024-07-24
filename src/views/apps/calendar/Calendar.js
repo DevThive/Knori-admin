@@ -8,9 +8,13 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import bootstrap5Plugin from '@fullcalendar/bootstrap5'
 import interactionPlugin from '@fullcalendar/interaction'
+import ko from 'date-fns/locale/ko'
+import { registerLocale } from 'react-datepicker'
 
 // ** Third Party Style Import
 import 'bootstrap-icons/font/bootstrap-icons.css'
+
+registerLocale('ko', ko)
 
 const blankEvent = {
   title: '',
@@ -58,13 +62,15 @@ const Calendar = props => {
       initialView: 'dayGridMonth',
       headerToolbar: {
         start: 'sidebarToggle, prev, next, name',
+        center: 'title', // 제목을 중앙에 위치
         end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
       },
       views: {
         week: {
-          titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
+          titleFormat: { year: 'numeric', month: 'numeric', day: 'numeric' } // 월을 숫자로 표시
         }
       },
+      locale: 'ko',
 
       /*
             Enable dragging and resizing event

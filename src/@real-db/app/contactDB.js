@@ -16,6 +16,7 @@ async function fetchDataAndProcess() {
         id: item.id,
         user_name: item.user_name,
         contact_title: item.content_title,
+        phone: item.user_phone,
         contact: item.content,
         contact_answer: item.contact_answer,
         date: new Date(item.createdAt) // 날짜 데이터로 변환하여 저장
