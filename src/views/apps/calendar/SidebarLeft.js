@@ -6,6 +6,8 @@ import Divider from '@mui/material/Divider'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import ko from 'date-fns/locale/ko'
+import { registerLocale } from 'react-datepicker'
 
 // ** Third Party Imports
 import DatePicker from 'react-datepicker'
@@ -15,6 +17,8 @@ import Icon from 'src/@core/components/icon'
 
 // ** Styled Component
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+
+registerLocale('ko', ko)
 
 const SidebarLeft = props => {
   const {
@@ -104,7 +108,7 @@ const SidebarLeft = props => {
             '& .react-datepicker': { boxShadow: 'none !important', border: 'none !important' }
           }}
         >
-          <DatePicker inline onChange={date => calendarApi.gotoDate(date)} />
+          <DatePicker inline locale='ko' dateFormat='yyyy/MM/dd' onChange={date => calendarApi.gotoDate(date)} />
         </DatePickerWrapper>
         <Divider sx={{ width: '100%', m: '0 !important' }} />
         <Box sx={{ p: 6, width: '100%', display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
