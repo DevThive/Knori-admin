@@ -55,12 +55,21 @@ export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (ev
 
 // ** Delete Event
 export const deleteEvent = createAsyncThunk('appCalendar/deleteEvent', async (id, { dispatch }) => {
-  const response = await axios.delete('/apps/calendar/remove-event', {
-    params: { id }
-  })
-  await dispatch(fetchEvents(['Personal', 'Business', 'Holiday']))
+  const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+  try {
+    const response = await axios.delete(`https://api.knori.or.kr/calendar/${id}`, {
+      headers: {
+        Authorization: `Bearer ${storedToken}` // storedToken이 정의되어 있어야 함
+      }
+    })
+    console.log(id)
+    await dispatch(fetchEvents(['Personal', 'Business', 'Holiday']))
 
-  return response.data
+    return response.data
+  } catch (error) {
+    console.error('Event deletion failed:', error)
+    throw error // 에러를 다시 던져서 호출하는 쪽에서 처리할 수 있게 함
+  }
 })
 
 export const appCalendarSlice = createSlice({
