@@ -126,6 +126,7 @@ const ContactList = () => {
   const [answerText, setAnswerText] = useState('')
 
   const handleListItemClick = row => {
+    // console.log(row)
     setSelectedRow(row)
     setAnswerText(row.contact_answer || '') // 기존 답변이 있으면 불러오기
   }
@@ -170,7 +171,6 @@ const ContactList = () => {
                 <Typography variant='body1' gutterBottom>
                   문의 내용: {selectedRow.contact}
                 </Typography>
-
                 <Typography variant='body1' gutterBottom>
                   고객 번호: {selectedRow.phone}
                 </Typography>
@@ -180,7 +180,7 @@ const ContactList = () => {
                   rows={4}
                   variant='outlined'
                   value={answerText}
-                  onChange={e => setAnswerText(e.target.value)}
+                  onChange={e => handleAnswerChange(selectedRow.id, e.target.value)}
                   placeholder='여기에 답변을 입력하세요...'
                   margin='normal'
                 />
@@ -191,7 +191,7 @@ const ContactList = () => {
             <Button onClick={handleDialogClose} color='primary'>
               취소
             </Button>
-            <Button onClick={handleDialogSubmit} color='primary'>
+            <Button onClick={() => handleAnswerSubmit(selectedRow.id)} color='primary'>
               저장하기
             </Button>
           </DialogActions>
