@@ -16,6 +16,7 @@ async function fetchDataAndProcess() {
         id: item.id,
         title: item.title,
         price: item.price,
+        price2: item.price2,
         EtcPrice: item.etcprice,
         content: item.content,
         photo: item.photo,
