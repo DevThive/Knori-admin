@@ -79,6 +79,8 @@ const TableStickyHeader = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [classes, setClasses] = useState([]) // 상태 추가
   const [editMode, setEditMode] = useState({})
+
+  // const [editMode2, setEditMode2] = useState({})
   const [EtceditMode, setEtcEditMode] = useState({})
   const [openRow, setOpenRow] = useState(null)
 
@@ -93,8 +95,8 @@ const TableStickyHeader = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-  //가격 저장
-  const savePrice = async (id, newPrice) => {
+  // 가격 저장
+  const savePrice = async (id, prices) => {
     const classId = id // classId를 id로 설정
     const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
     try {
@@ -102,7 +104,8 @@ const TableStickyHeader = () => {
       const response = await axios.put(
         `https://api.knori.or.kr/class/price/${classId}`,
         {
-          price: newPrice
+          price: prices.price, // price 값을 사용
+          price2: prices.price2 // price2 값을 추가
         },
         { headers: { Authorization: `Bearer ${storedToken}` } }
       )
@@ -112,7 +115,7 @@ const TableStickyHeader = () => {
         throw new Error('가격 저장에 실패했습니다.')
       }
 
-      console.log(`Saving new price for ${classId}: ${newPrice}`)
+      console.log(`Saving new prices for ${classId}: ${prices.price}, ${prices.price2}`)
 
       // 저장 후 수정 모드 종료
       setEditMode({ ...editMode, [id]: false })
@@ -122,6 +125,50 @@ const TableStickyHeader = () => {
       // 에러 처리 로직 추가 (예: 사용자에게 알림)
     }
   }
+
+  const handleSave = (row, column) => {
+    const priceValue = parseFloat(row[column.id])
+    const price2Value = parseFloat(row.price2)
+
+    // 가격이 숫자인지 확인
+    if (isNaN(priceValue) || isNaN(price2Value)) {
+      alert('가격은 유효한 숫자여야 합니다.')
+
+      return // 유효하지 않은 경우 함수 종료
+    }
+
+    savePrice(row.id, { price: priceValue, price2: price2Value })
+  }
+
+  // //가격2 저장2
+  // const savePrice2 = async (id, newPrice) => {
+  //   const classId = id // classId를 id로 설정
+  //   const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+  //   try {
+  //     // API 요청 보내기
+  //     const response = await axios.put(
+  //       `https://api.knori.or.kr/class/price2/${classId}`,
+  //       {
+  //         price: newPrice
+  //       },
+  //       { headers: { Authorization: `Bearer ${storedToken}` } }
+  //     )
+
+  //     // 응답 확인
+  //     if (response.status !== 200) {
+  //       throw new Error('가격 저장에 실패했습니다.')
+  //     }
+
+  //     console.log(`Saving new price for ${classId}: ${newPrice}`)
+
+  //     // 저장 후 수정 모드 종료
+  //     setEditMode2({ ...editMode, [id]: false })
+  //   } catch (error) {
+  //     console.error('Error saving new price:', error)
+
+  //     // 에러 처리 로직 추가 (예: 사용자에게 알림)
+  //   }
+  // }
 
   //단체 가격 저장
   const saveEtcPrice = async (id, newPrice) => {
@@ -527,10 +574,19 @@ const TableStickyHeader = () => {
                                 variant='outlined'
                                 className={classes.textField}
                               />{' '}
+                              {'~'}{' '}
+                              <TextField
+                                defaultValue={row.price2} // price2 값 가져오기
+                                onChange={e => (row.price2 = e.target.value)} // price2 값 업데이트
+                                type='number'
+                                size='small'
+                                variant='outlined'
+                                className={classes.textField}
+                              />
                               <Button
                                 variant='contained'
                                 color='primary'
-                                onClick={() => savePrice(row.id, row[column.id])}
+                                onClick={() => handleSave(row, column)} // row와 column을 인자로 전달
                                 className={classes.button}
                               >
                                 저장
